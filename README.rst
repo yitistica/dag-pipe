@@ -28,8 +28,7 @@ Features
 Credits
 -------
 
-This package was created with Cookiecutter_ and the `yitistica/ds-cookiecutter`_ project template. Parts of the template are based on audreyr/cookiecutter-pypackage_ template.
+This package was created with Cookiecutter_ and the `yitistica/ds-cookiecutter`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _yitistica/ds-cookiecutter: https://github.com/yitistica/ds-cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
