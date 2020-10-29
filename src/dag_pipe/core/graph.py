@@ -170,8 +170,8 @@ class WrappedGraphBase(object):
         return is_isolate
 
     def all_isolates(self):
-        isoloates = nx.isolates(self.graph)
-        return isoloates
+        isolates = nx.isolates(self.graph)
+        return isolates
 
     def topological_sort(self):
         return nx.topological_sort(self.graph)
@@ -180,7 +180,7 @@ class WrappedGraphBase(object):
         pass
 
 
-class ComputeGraph(object):
+class TaskNet(object):
     def __init__(self):
         pass
 

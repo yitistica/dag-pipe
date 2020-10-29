@@ -1,6 +1,6 @@
 """
 net: a set of processes;
-graph_base: a graph_base consists of input:
+core: a core consists of input:
 
 
 space: [];

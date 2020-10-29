@@ -23,7 +23,50 @@ when running the process, the process id is generated.
 
 sometimes, the network requires an object,
 
+a task: consists of one or more process:
+
+a task can be compute
+
+job consists of multiple
+
+expose
+
+network material:
+
+expose output;
+
+
+@Net.register(network=[], input=[], output=[], expose=[], input_process=[], process=[], output_process=[])
+def function():
+    pass
+
+only keeps the expose
+
+
+network.materials[]
+
 """
+
+
+class TaskCore(object):
+    def __new__(cls, *args, **kwargs):
+        pass
+
+    def __init__(self):
+        self._id = None
+
+    @property
+    def id(self):
+        return self._id
+
+
+class TaskRunner(object):
+    def __init__(self):
+        pass
+
+    def process(self):
+        pass
+
 
 
 class UpStreamProcess(object):
@@ -39,6 +82,11 @@ class ProcessInput(object):
         pass
 
     def validate(self):
+        pass
+
+
+class ProcessResult(object):
+    def __init__(self):
         pass
 
 
@@ -80,5 +128,7 @@ class ProcessNode(object):
 class ProcessResult(object):
     def __init__(self):
         pass
+
+
 
 
