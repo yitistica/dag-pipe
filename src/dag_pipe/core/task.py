@@ -36,7 +36,7 @@ network material:
 expose output;
 
 
-@Net.register(network=[], input=[], output=[], expose=[], input_process=[], process=[], output_process=[])
+@Net.register(network=[], input=[], output=[], expose=[], input_process=[], process=[], output_process=[], turn_off=False)
 def function():
     pass
 
@@ -46,6 +46,7 @@ only keeps the expose
 network.materials[]
 
 """
+import functools
 
 
 class TaskCore(object):
@@ -66,7 +67,6 @@ class TaskRunner(object):
 
     def process(self):
         pass
-
 
 
 class UpStreamProcess(object):
@@ -125,10 +125,33 @@ class ProcessNode(object):
         pass
 
 
-class ProcessResult(object):
-    def __init__(self):
+def class_register(cls):
+    cls._propdict = {}
+    for methodname in dir(cls):
+        method = getattr(cls, methodname)
+        if hasattr(method, '_prop'):
+            cls._propdict.update(
+                {cls.__name__ + '.' + methodname: method._prop})
+    return cls
+
+
+def register(*args):
+    def wrapper(func):
+        func._prop = args
+        return func
+    return wrapper
+
+
+@class_register
+class MyClass(object):
+
+    @register('prop1', 'prop2')
+    def my_method(self, arg1, arg2):
         pass
 
+    @register('prop3', 'prop4')
+    def my_other_method(self, arg1, arg2):
+        pass
 
 
 
