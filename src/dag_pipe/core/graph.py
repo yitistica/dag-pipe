@@ -180,6 +180,31 @@ class WrappedGraphBase(object):
         pass
 
 
+class TaskRegistry(object):
+    registry = dict()
+
+    @classmethod
+    def register_task(cls, task):
+        cls.registry[task.id] = task
+
+    @classmethod
+    def add_task_decor(cls, fn):
+        cls.registry['a'] = fn
+        return fn
+
+    def __init__(self, name):
+        self.registry = None
+        self.build_registry(name=name)
+
+    def build_registry(self, name):
+        for task_name, task in TaskRegistry.registry.items():
+            if task.space == name:
+                self.registry[task_name] = task
+
+    def add_task(self, name):
+        pass
+
+
 class TaskNet(object):
     def __init__(self):
         pass
