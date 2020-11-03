@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from dag_pipe.core.utils.sys import locate_object, check_is_class, check_is_function, check_is_method
+from dag_pipe.core.utils.types import locate_object, check_is_class, check_is_function
 
 
 def _check_kernel_type(kernel):

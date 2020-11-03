@@ -8,7 +8,7 @@ for each class:
 
 """
 from dag_pipe.core.helpers.kernel_meta import check_kernel_meta, serialize_kernel_meta
-from dag_pipe.core.utils.sys import hash_string
+from dag_pipe.core.utils.types import hash_string
 
 _HASH_PRECISION = 7
 
