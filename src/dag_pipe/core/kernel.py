@@ -7,7 +7,7 @@ for each class:
     but each callable means a method rather than the whole class;
 
 """
-from dag_pipe.core.helpers.kernel_meta import check_kernel_meta, serialize_kernel_meta
+from dag_pipe.core.helpers.kernel_meta import check_meta_meta, serialize_kernel_meta
 from dag_pipe.core.utils.types import hash_string
 
 _HASH_PRECISION = 7
@@ -25,8 +25,8 @@ class KernelCollection(object):
 
 class Kernel(object):
 
-    def __new__(cls, callable_, *args, **kwargs):
-        kernel_meta = check_kernel_meta(callable_)
+    def __new__(cls, function, *args, **kwargs):
+        kernel_meta = check_meta_meta(function)
         id_ = _hash_kernel_meta(meta=kernel_meta)
 
         kernel = KernelCollection.kernels.get(id_)
@@ -35,7 +35,7 @@ class Kernel(object):
             kernel._id = id_
             kernel.kernel_meta = kernel_meta
             kernel._type = kernel_meta['kernel_type']
-            kernel._callable = callable_
+            kernel._callable = function
             KernelCollection.kernels[id_] = kernel
             return kernel
         else:
@@ -56,6 +56,17 @@ class Kernel(object):
         self._callable()
 
 
+class FunctionPackager(object):
+    def __init__(self, package_):
+        pass
+
+    def repackage_function(self, function):
+        pass
+
+    def init_state(self):
+        pass
+
+
 def function_a(a):
     return a + 1
 
@@ -64,9 +75,21 @@ def function_b(b):
     return b + 2
 
 
+def add_class(cls):
+    if 'a' in KernelCollection.kernels:
+        KernelCollection.kernels['b'] = cls  # wrap the class
+    else:
+        KernelCollection.kernels['a'] = cls
+    return cls
+
+
+@add_class
 class Gaussian(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, a, b=2):
+        self.a = a
+        self.b = b
 
 
+
+print(KernelCollection.kernels)

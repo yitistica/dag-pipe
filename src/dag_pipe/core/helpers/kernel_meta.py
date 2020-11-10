@@ -16,7 +16,7 @@ def _check_kernel_type(kernel):
     return type_
 
 
-def check_kernel_meta(kernel):
+def check_meta_meta(kernel):
     location = locate_object(kernel)
     kernel_type = _check_kernel_type(kernel)
 

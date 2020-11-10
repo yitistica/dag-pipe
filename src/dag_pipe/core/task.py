@@ -40,7 +40,7 @@ Task: multiple processes
 Process
 
 @debug
-@Net.register(network=[], input=[], output=[], expose=[], input_process=[], process=[], output_process=[], turn_off=False)
+@Net.register(network=[], input=[], output=[], expose=[], input_process=[], process=[], output_process=[], turn_off=False, init_at=[])
 def function():
     pass
 

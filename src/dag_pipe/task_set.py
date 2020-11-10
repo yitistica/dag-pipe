@@ -1,6 +1,6 @@
 from dag_pipe.core.graph import TaskRegistry
 from dag_pipe.core.task import TaskCore
-from dag_pipe.core.kernel import check_kernel_meta
+from dag_pipe.core.kernel import check_meta_meta
 from dag_pipe.core.utils.types import check_is_function, is_class_static_instance_method, is_class_method, is_instance_method
 
 

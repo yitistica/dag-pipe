@@ -1,19 +1,40 @@
+"""
+
+NOTE ON BOUND AND UNBOUND METHOD:
+
+CAUTION !:
+The implementation takes some assumptions that may not be:
+
+is_method:
+inspect.ismethod(obj) (Return True if the object is a bound method written in Python):
+| method/function          | return |
+| :---                     | :----: |
+| Class.classmethod        | True   |
+| class.staticmethod       | False  |
+| class.instancemethod     | False  |
+| instance.classmethod     | True   |
+| instance.staticmethod    | False  |
+| instance.instancemethod  | True   |
+| function                 | False  |
+"""
+
 import hashlib
 import inspect
 from collections import OrderedDict
+import functools
 
 
 def _get_object_name(object_):
     return object_.__name__
 
 
-def _get_object_module(object_):
+def _get_object_module_name(object_):
     module = object_.__module__
     return module
 
 
 def locate_object(object_):
-    location = OrderedDict([('module', _get_object_module(object_)),
+    location = OrderedDict([('module', _get_object_module_name(object_)),
                             ('name', _get_object_name(object_))])
 
     return location
@@ -23,9 +44,39 @@ def check_is_class(object_):
     return inspect.isclass(object_)
 
 
+def get_class_that_defined_method(meth):
+    """
+    !
+    :param meth:
+    :return:
+    """
+    if inspect.ismethod(meth) or \
+            (inspect.isbuiltin(meth) and getattr(meth, '__self__', None) is not None) \
+            and getattr(meth.__self__, '__class__', None):
+
+        for cls in inspect.getmro(meth.__self__.__class__):
+            if meth.__name__ in cls.__dict__:
+                return cls
+        meth = getattr(meth, '__func__', meth)
+
+    elif inspect.isfunction(meth):
+        cls = getattr(inspect.getmodule(meth),
+                      meth.__qualname__.split('.<locals>', 1)[0].rsplit('.', 1)[0],
+                      None)
+        if isinstance(cls, type):
+            return cls
+
+    return getattr(meth, '__objclass__', None)
+
+
+def _get_class_of_method(method_object):
+    pass
+
+
 def _patch_single_method_class(method_object):
-    SingleMethod = type('SingleMethod', (object,), {'method': method_object})
-    return SingleMethod
+    method_name = method_object.__qualname__.split('.')[-1]
+    single_method_class = type('SingleMethod', (object,), {'method': method_object})
+    return single_method_class
 
 
 def is_instance_method(method):
