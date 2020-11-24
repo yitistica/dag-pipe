@@ -140,13 +140,13 @@ def is_class_static_instance_method(method):
     return method_type
 
 
-def check_is_function(object_):
-    if callable(object_) and hasattr(object_, '__call__'):
-        _is_function = True
-    else:
-        _is_function = False
-
-    return _is_function
+# def check_is_function(object_):
+#     if callable(object_) and hasattr(object_, '__call__'):
+#         _is_function = True
+#     else:
+#         _is_function = False
+#
+#     return _is_function
 
 
 def check_is_function(object_):
