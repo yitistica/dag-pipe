@@ -40,7 +40,8 @@ Task: multiple processes
 Process
 
 @debug
-@Net.register(network=[], input=[], output=[], expose=[], input_process=[], process=[], output_process=[], turn_off=False, init_at=[])
+@Net.register(network='str', input=Argument(), output=[], expose=[], turn_off=False, rename='a')
+@Net.register(input_process=[])
 def function():
     pass
 
@@ -49,6 +50,8 @@ only keeps the expose
 
 network.materials[]
 
+
+if input is not given, then it is then passed on the arguments at runtime;
 """
 import functools
 

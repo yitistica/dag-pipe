@@ -18,7 +18,6 @@ def _check_kernel_type(kernel):
 
 def get_meta(kernel):
     location = locate_object(kernel)
-
     meta = OrderedDict([('location', location)])
 
     return meta

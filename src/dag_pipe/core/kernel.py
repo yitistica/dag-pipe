@@ -31,7 +31,6 @@ class KernelCollection(object):  # TEMP
 
 
 class Kernel(object):
-
     def __new__(cls, function, *args, **kwargs):
         function = _validate_function(function)
         kernel_meta = get_meta(function)
@@ -55,4 +54,6 @@ class Kernel(object):
     def id(self):
         return self._id
 
+    def exec_kernel(self, *args, **kwargs):
+        return self._callable(*args, **kwargs)
 
