@@ -21,6 +21,7 @@ inspect.ismethod(obj) (Return True if the object is a bound method written in Py
 import hashlib
 import inspect
 from collections import OrderedDict
+from collections.abc import Iterable
 import functools
 
 
@@ -38,6 +39,10 @@ def locate_object(object_):
                             ('name', _get_object_name(object_))])
 
     return location
+
+
+def check_is_iterable(object_):
+    return isinstance(object_, Iterable)
 
 
 def check_is_class(object_):

@@ -79,7 +79,6 @@ class ProcessLog(object):
         self.occurrence += 1
 
 
-
 class Gaussian(object):
 
     def __init__(self, a, b=2):
@@ -98,14 +97,6 @@ def add_class(cls):
     return cls
 
 
-class Gaussian(object):
-
-    def __init__(self, a, b=2):
-        self.a = a
-        self.b = b
-
-    def method_a(self, a=3):
-        return a + self.a
 
 
 Kernel(Gaussian.method_a)
