@@ -41,7 +41,7 @@ Process
 
 @debug
 @Net.register(network='str', input=Argument(), output=[], expose=[], turn_off=False, rename='a')
-@Net.register(input_process=[])
+@Net.add_argument()
 def function():
     pass
 
