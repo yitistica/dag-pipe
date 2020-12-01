@@ -19,7 +19,7 @@ function: able to loop over a function for x times;
 @process.init()
 @process.func(*kernel_args, **kernel_kwargs, analyzer=(func1, func2))
 @process.method()
-
+@process.add_preprocessor()
 
 process log:
 export to nosql or any database with specificied format, gen table;
@@ -30,6 +30,7 @@ process id is different from run time id, process id
 """
 
 from dag_pipe.core.kernel import Kernel, KernelCollection
+from dag_pipe.core.process.process_argument import Arguments, inspect_function_default_arguments
 
 
 class ProcessCollection(object):  # TEMP

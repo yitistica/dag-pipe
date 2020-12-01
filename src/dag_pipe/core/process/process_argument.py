@@ -244,6 +244,8 @@ class ArgumentsIterator(object):
             elif argument_type == 'kwarg':
                 key = self._flatten_arguments[index]['key']
                 kwargs[key] = argument_value
+            else:
+                NotImplementedError(f'argument type ({argument_type}) is not supported.')
 
         arguments = ArgumentsCore(*args, **kwargs)
         return arguments
