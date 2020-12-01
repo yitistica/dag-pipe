@@ -45,6 +45,19 @@ def check_is_iterable(object_):
     return isinstance(object_, Iterable)
 
 
+def check_container_class(object_):
+    if isinstance(object_, dict):
+        return dict
+    elif isinstance(object_, list):
+        return list
+    elif isinstance(object_, tuple):
+        return tuple
+    elif isinstance(object_, set):
+        return set
+    else:
+        raise TypeError(f'object with the type ({object_}) cannot be identified.')
+
+
 def check_is_class(object_):
     return inspect.isclass(object_)
 

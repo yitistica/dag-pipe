@@ -19,37 +19,45 @@ pass keyword argument:
 
 
 """
+
 from collections import OrderedDict
-from dag_pipe.core.utils.types import check_is_iterable
 import inspect
+import itertools
+
+from dag_pipe.core.utils.types import check_is_iterable
+from dag_pipe.core.utils.types import check_container_class
 
 
 class EmptyArgument(object):
     pass
 
 
-def _inspect_function_arguments(function):
-    signature = inspect.signature(function)
+_KEY_ITERABLE_TYPE = [dict]
+_CONTAINER_ITERABLE_TYPE = [list, tuple, set]
+
+
+def _inspect_function_arguments(function_):
+    signature = inspect.signature(function_)
 
     argument_dict = OrderedDict()
-    for param_name, param_value in signature.parameters.items():
-        default = param_value.default
+    for argument_key, argument_value in signature.parameters.items():
+        default = argument_value.default
 
         if default is inspect.Parameter.empty:
-            argument_dict[param_name] = EmptyArgument
+            argument_dict[argument_key] = EmptyArgument
         else:
-            argument_dict[param_name] = default
+            argument_dict[argument_key] = default
 
     return argument_dict
 
 
-def inspect_function_default_arguments(function):
-    param_dict = _inspect_function_arguments(function=function)
+def inspect_function_default_arguments(function_):
+    argument_dict = _inspect_function_arguments(function_=function_)
 
     default_argument_dict = OrderedDict()
-    for param_name, default_value in param_dict.items():
-        if default_value is not EmptyArgument:
-            default_argument_dict[param_name] = default_value
+    for argument_key, default_argument_value in argument_dict.items():
+        if default_argument_value is not EmptyArgument:
+            default_argument_dict[argument_key] = default_argument_value
 
     return default_argument_dict
 
@@ -78,31 +86,19 @@ class Kwargs(object):
         return self._kwargs
 
 
-class Arguments(Args, Kwargs):
-    def __init__(self, *args, **kwargs):
-        Args.__init__(self, *args)
-        Kwargs.__init__(self, **kwargs)
-
-
-class DefaultArguments(Kwargs):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def if_empty(self):
-        if self.kwargs == dict():
-            return True
-        else:
-            return False
-
-
 class ArgumentCollection(object):
     def __new__(cls, collection):
         if check_is_iterable(collection):
             self = super().__new__(cls)
-            self.collection = collection
         else:
             raise TypeError(f"collection argument takes only an iterable, but was given an {type(collection)}")
         return self
+
+    def __init__(self, collection):
+        self.collection = collection
+
+    def __iter__(self):
+        return ArgumentCollectionIterator(self)
 
     def __repr__(self):
         if hasattr(self.collection, '__repr__'):
@@ -117,7 +113,60 @@ class ArgumentCollection(object):
             return None
 
 
-class KernelArguments(Arguments):
+class ArgumentCollectionIterator(object):
+    def __new__(cls, argument_collection):
+        if isinstance(argument_collection, ArgumentCollection):
+            self = super().__new__(cls)
+        else:
+            raise TypeError(f"argument_collection arg does not support the type: {type(argument_collection)}")
+        return self
+
+    def __init__(self, argument_collection):
+        self.argument_collection = argument_collection
+        self._type = check_container_class(argument_collection.collection)
+        self._collection_iterator = None
+        self._build_collection_iterator()
+
+    def _build_collection_iterator(self):
+        if self._type in (_KEY_ITERABLE_TYPE + _CONTAINER_ITERABLE_TYPE):
+            self._collection_iterator = iter(self.argument_collection.collection)
+        else:
+            raise TypeError(f'type {self._type} is not supported.')
+
+    def __next__(self):
+        _next = next(self._collection_iterator)
+        if self._type in _KEY_ITERABLE_TYPE:
+            return self.argument_collection.collection[_next]
+        elif self._type in _CONTAINER_ITERABLE_TYPE:
+            return _next
+        else:
+            raise TypeError(f'type {self._type} is not supported.')
+
+
+class DefaultArguments(Kwargs):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def if_empty(self):
+        if self.kwargs == dict():
+            return True
+        else:
+            return False
+
+
+class ArgumentsCore(Args, Kwargs):
+    def __init__(self, *args, **kwargs):
+        Args.__init__(self, *args)
+        Kwargs.__init__(self, **kwargs)
+
+    def __repr__(self):
+        return f"Arguments({self.args}, {self.kwargs})"
+
+    def __str__(self):
+        return f"({self.args}, {self.kwargs})"
+
+
+class Arguments(ArgumentsCore):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.default_arguments = DefaultArguments()
@@ -125,34 +174,83 @@ class KernelArguments(Arguments):
     def add_default_arguments(self, default_argument_dict):
         self.default_arguments.add_kwargs(**default_argument_dict)
 
+    def _fill_kwargs_with_default(self):
+        merged_kwargs = {**self.kwargs}
+        for key, default_value in self.default_arguments.kwargs.items():
+            if key in self.kwargs:
+                pass
+            else:
+                merged_kwargs[key] = default_value
 
-class ProcessArguments(object):
-    def __init__(self):
-        pass
+        return merged_kwargs
+
+    def full_arguments(self):
+        args = self.args
+        kwargs = self._fill_kwargs_with_default()
+
+        return args, kwargs
+
+    def __iter__(self):
+        args, kwargs = self.full_arguments()
+        return ArgumentsIterator(args=args, kwargs=kwargs)
 
 
-class Gaussian(object):
+class ArgumentsIterator(object):
+    def __init__(self, args, kwargs):
+        self._args = args
+        self._kwargs = kwargs
+        self.argument_product = self._build_iterator()
 
-    def __init__(self, a, b=2):
-        self.a = a
-        self.b = b
+    def _flatten_args(self):
+        return [{'type': 'arg',
+                 'key': index,
+                 'value': arg} for index, arg in enumerate(self._args)]
+
+    def _flatten_kwargs(self):
+        return [{'type': 'kwarg',
+                 'key': key,
+                 'value': kwarg} for key, kwarg in self._kwargs.items()]
+
+    def _flatten(self):
+        arguments = self._flatten_args() + self._flatten_kwargs()
+        return arguments
 
     @staticmethod
-    def meothd_b(a):
-        return a + 1
+    def _build_iterables_pool(flatten_arguments):
 
-    def method_a(self, a=3):
-        return a + self.a
+        argument_pool = []
+        for arg_info in flatten_arguments:
+            arg_value = arg_info['value']
+            if isinstance(arg_value, ArgumentCollection):
+                argument_pool.append(arg_value)
+            else:
+                argument_pool.append((arg_value,))
+
+        return argument_pool
+
+    def _build_iterator(self):
+        self._flatten_arguments = self._flatten()
+
+        argument_pool = self._build_iterables_pool(self._flatten_arguments)
+        argument_product = itertools.product(*argument_pool)
+        return argument_product
+
+    def _construct_argument_object_with_values(self, argument_values):
+        args, kwargs = [], {}
+        for index, argument_value in enumerate(argument_values):
+            argument_type = self._flatten_arguments[index]['type']
+            if argument_type == 'arg':
+                args.append(argument_value)
+            elif argument_type == 'kwarg':
+                key = self._flatten_arguments[index]['key']
+                kwargs[key] = argument_value
+
+        arguments = ArgumentsCore(*args, **kwargs)
+        return arguments
+
+    def __next__(self):
+        argument_values = next(self.argument_product)
+        arguments = self._construct_argument_object_with_values(argument_values=argument_values)
+        return arguments
 
 
-def print_a(*args, **kwargs):
-    for i in args:
-        print(args)
-
-
-agument = Arguments( w='a', c=[1, 2])
-
-# print(hasattr(range(1,20), '__str__'))
-
-print(ArgumentCollection({'a': 2, 'b': 3}))
-# print(inspect_function_default_params(Gaussian.method_a))
