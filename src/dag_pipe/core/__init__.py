@@ -26,6 +26,8 @@ net.import(process_a, data=virtualiser, param=1)
 def process_a(data):
     pass
 
+
+when it is called normally, it does not replace anything
 """
 
 
