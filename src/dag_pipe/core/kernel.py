@@ -28,6 +28,17 @@ def _hash_kernel_meta(meta):
     return hash_
 
 
+class MethodNotFoundError(Exception):
+    def __init__(self, message=None):
+            self.message = message
+
+    def __str__(self):
+        if self.message:
+            return f'MethodNotFoundError, {self.message}'
+        else:
+            return 'MethodNotFoundError has been raised'
+
+
 class KernelCollection(object):  # TEMP
     kernels = dict()
 
@@ -64,6 +75,13 @@ class Kernel(object):
 class MethodKernel(Kernel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        _method = kwargs.get('method')
+        if not _method:
+            raise KeyError("method name is not given.")
+
+    def _verify_method(self, method_name):
+        pass
 
     def call(self):
         pass
