@@ -16,9 +16,17 @@ def _check_kernel_type(kernel):
     return type_
 
 
-def get_meta(kernel):
-    location = locate_object(kernel)
-    meta = OrderedDict([('location', location)])
+def get_meta(callable_, method=None):
+
+    callable_location = locate_object(callable_)
+
+    if method:
+        callable_ = getattr(callable_, method)
+
+    if callable_:
+        callable_location['method'] = method
+
+    meta = OrderedDict([('location', callable_location)])
 
     return meta
 
@@ -26,6 +34,3 @@ def get_meta(kernel):
 def serialize_kernel_meta(meta):
     meta_str = str(meta)
     return meta_str
-
-
-

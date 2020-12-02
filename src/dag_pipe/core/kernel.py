@@ -44,6 +44,11 @@ class KernelCollection(object):  # TEMP
 
 
 class Kernel(object):
+
+    @classmethod
+    def _register_kernel(cls, ):
+        pass
+
     def __new__(cls, callable_, *args, **kwargs):
         callable_ = _validate_callable(callable_)
         kernel_meta = get_meta(callable_)  # TODO
