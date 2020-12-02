@@ -7,7 +7,7 @@ for each class:
     but each callable means a method rather than the whole class;
 
 """
-from dag_pipe.core.helpers.kernel_meta import get_meta, serialize_kernel_meta
+from dag_pipe.core.helpers.kernel_meta import build_function_meta, build_method_meta, serialize_kernel_meta
 from dag_pipe.core.utils.types import hash_string, check_is_function, check_is_class
 
 _HASH_PRECISION = 7
@@ -15,9 +15,9 @@ _HASH_PRECISION = 7
 
 def _validate_callable(callable_):
     if check_is_function(callable_):
-        return callable_
+        return 'function'
     elif check_is_class(callable_):
-        return callable_
+        return 'class'
     else:
         raise TypeError('Not a callable.')  # TODO
 
@@ -30,7 +30,7 @@ def _hash_kernel_meta(meta):
 
 class MethodNotFoundError(Exception):
     def __init__(self, message=None):
-            self.message = message
+        self.message = message
 
     def __str__(self):
         if self.message:
@@ -44,28 +44,35 @@ class KernelCollection(object):  # TEMP
 
 
 class Kernel(object):
-
-    @classmethod
-    def _register_kernel(cls, ):
-        pass
-
     def __new__(cls, callable_, *args, **kwargs):
-        callable_ = _validate_callable(callable_)
-        kernel_meta = get_meta(callable_)  # TODO
-        id_ = _hash_kernel_meta(meta=kernel_meta)
+        type_ = _validate_callable(callable_)
 
+        if type_ == 'function':
+            kernel_meta = build_function_meta(callable_)
+        elif type_ == 'class':
+            method_name = kwargs.get('method')
+            if not method_name:
+                raise TypeError(f"__init__() missing 1 required keyword argument: 'method'. ")
+            kernel_meta = build_method_meta(callable_, method_name=method_name)
+        else:
+            raise TypeError(f" type_ ({type_}) is not supported.")
+
+        id_ = _hash_kernel_meta(meta=kernel_meta)
         kernel = KernelCollection.kernels.get(id_)
+
         if not kernel:
             kernel = super().__new__(cls)
             kernel._id = id_
             kernel.kernel_meta = kernel_meta
             kernel._callable = callable_
-            return kernel
+            KernelCollection.kernels[kernel._id] = kernel
         else:
-            return kernel
+            pass
+
+        return kernel
 
     def __init__(self, *args, **kwargs):
-        KernelCollection.kernels[self.id] = self
+        pass
 
     @property
     def id(self):

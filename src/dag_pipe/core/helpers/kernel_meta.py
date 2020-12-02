@@ -16,19 +16,23 @@ def _check_kernel_type(kernel):
     return type_
 
 
-def get_meta(callable_, method=None):
+def build_function_meta(function_):
 
-    callable_location = locate_object(callable_)
-
-    if method:
-        callable_ = getattr(callable_, method)
-
-    if callable_:
-        callable_location['method'] = method
-
-    meta = OrderedDict([('location', callable_location)])
+    location = locate_object(function_)
+    meta = OrderedDict([('location', location)])
 
     return meta
+
+
+def build_method_meta(class_, method_name):
+
+    location = locate_object(class_)
+    location['method'] = method_name
+    meta = OrderedDict([('location', location)])
+
+    return meta
+
+
 
 
 def serialize_kernel_meta(meta):
