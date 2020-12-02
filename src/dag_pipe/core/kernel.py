@@ -46,7 +46,7 @@ class KernelCollection(object):  # TEMP
 class Kernel(object):
     def __new__(cls, callable_, *args, **kwargs):
         callable_ = _validate_callable(callable_)
-        kernel_meta = get_meta(callable_)
+        kernel_meta = get_meta(callable_)  # TODO
         id_ = _hash_kernel_meta(meta=kernel_meta)
 
         kernel = KernelCollection.kernels.get(id_)
@@ -55,13 +55,12 @@ class Kernel(object):
             kernel._id = id_
             kernel.kernel_meta = kernel_meta
             kernel._callable = callable_
-            KernelCollection.kernels[id_] = kernel
             return kernel
         else:
             return kernel
 
     def __init__(self, *args, **kwargs):
-        pass
+        KernelCollection.kernels[self.id] = self
 
     @property
     def id(self):
@@ -73,15 +72,21 @@ class Kernel(object):
 
 
 class MethodKernel(Kernel):
+
+    def __new__(cls, callable_, *args, **kwargs):
+        _method = kwargs.get('method')
+        if not _method:
+            raise TypeError(f"__init__() missing 1 required keyword argument: 'method'. ")
+
+        kernel = super().__new__(*args, **kwargs)
+        return kernel
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        _method = kwargs.get('method')
-        if not _method:
-            raise KeyError("method name is not given.")
-
     def _verify_method(self, method_name):
-        pass
+        method = getattr(self.callable, method_name)
+        print(method)
 
     def call(self):
         pass
@@ -105,4 +110,8 @@ class Gaussian(object):
 
 
 
+def func(a):
+    return None
 
+
+func()
