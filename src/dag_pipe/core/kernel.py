@@ -13,15 +13,6 @@ from dag_pipe.core.utils.types import hash_string, check_is_function, check_is_c
 _HASH_PRECISION = 7
 
 
-def _validate_callable(callable_):
-    if check_is_function(callable_):
-        return 'function'
-    elif check_is_class(callable_):
-        return 'class'
-    else:
-        raise TypeError('Not a callable.')  # TODO
-
-
 def _hash_kernel_meta(meta):
     meta_str = serialize_kernel_meta(meta)
     hash_ = hash_string(string=meta_str, precision=_HASH_PRECISION)
@@ -43,20 +34,13 @@ class KernelCollection(object):  # TEMP
     kernels = dict()
 
 
+class CallableMeta(object):
+    def __init__(self):
+        pass
+
+
 class Kernel(object):
-    def __new__(cls, callable_, *args, **kwargs):
-        type_ = _validate_callable(callable_)
-
-        if type_ == 'function':
-            kernel_meta = build_function_meta(callable_)
-        elif type_ == 'class':
-            method_name = kwargs.get('method')
-            if not method_name:
-                raise TypeError(f"__init__() missing 1 required keyword argument: 'method'. ")
-            kernel_meta = build_method_meta(callable_, method_name=method_name)
-        else:
-            raise TypeError(f" type_ ({type_}) is not supported.")
-
+    def __new__(cls, callable_, kernel_meta, *args, **kwargs):
         id_ = _hash_kernel_meta(meta=kernel_meta)
         kernel = KernelCollection.kernels.get(id_)
 
@@ -83,14 +67,30 @@ class Kernel(object):
         return self.kernel._callable
 
 
-class MethodKernel(Kernel):
-
+class FunctionKernel(Kernel):
     def __new__(cls, callable_, *args, **kwargs):
-        _method = kwargs.get('method')
-        if not _method:
+
+        if not check_is_function(object_=callable_):
+            raise TypeError(f"callable_ ({callable_}) by type ({type(callable_)}) is not a function.")
+        kernel_meta = build_function_meta(callable_)
+        kernel = super().__new__(callable_=callable_, kernel_meta=kernel_meta, *args, **kwargs)
+
+        return kernel
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class BoundKernel(Kernel):
+    def __new__(cls, method_class, method_name, *args, **kwargs):
+        if not check_is_class(method_class):
+            raise TypeError(f"method_class ({method_class}) by type ({type(method_class)}) is not a class.")
+
+        if not method_name:
             raise TypeError(f"__init__() missing 1 required keyword argument: 'method'. ")
 
-        kernel = super().__new__(*args, **kwargs)
+        kernel_meta = build_method_meta(class_=method_class, method_name=)
+        kernel = super().__new__(callable_=callable_, *args, **kwargs)
         return kernel
 
     def __init__(self, *args, **kwargs):
