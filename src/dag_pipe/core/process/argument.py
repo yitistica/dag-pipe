@@ -165,6 +165,15 @@ class ArgumentsCore(Args, Kwargs):
     def __str__(self):
         return f"({self.args}, {self.kwargs})"
 
+    def _compare(self, other):
+        pass
+
+    def __eq__(self, other):
+        return self._compare(other=other)
+
+    def diff(self, other):
+        pass
+
 
 class Arguments(ArgumentsCore):
     def __init__(self, *args, **kwargs):
