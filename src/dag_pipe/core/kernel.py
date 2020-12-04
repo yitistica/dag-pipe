@@ -165,20 +165,3 @@ class StaticMethodKernel(ClassKernel):
     def call(self, *args, **kwargs):
         return self.callable(*args, **kwargs)
 
-
-class Gaussian(object):
-    def __init__(self, a, b=2):
-        self.a = a
-        self.b = b
-
-    def method_a(self, a):
-        return a + self.a
-
-    @staticmethod
-    def method_b(b):
-        return b + 1
-
-    @classmethod
-    def method_c(cls, c):
-        return c + 2
-

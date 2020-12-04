@@ -117,13 +117,21 @@ class ProcessLog(object):
 
 
 class Gaussian(object):
-
     def __init__(self, a, b=2):
         self.a = a
         self.b = b
 
     def method_a(self, a):
         return a + self.a
+
+    @staticmethod
+    def method_b(b):
+        return b + 1
+
+    @classmethod
+    def method_c(cls, c):
+        return c + 2
+
 
 
 def add_class(cls):
