@@ -6,3 +6,8 @@ class ProcessAnalyzer(object):
 
     def __call__(self, *args, **kwargs):
         pass
+
+
+class ResultAnalyzer(object):
+    pass
+

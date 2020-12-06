@@ -161,7 +161,3 @@ class ClassMethodKernel(ClassKernel):
 class StaticMethodKernel(ClassKernel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def call(self, *args, **kwargs):
-        return self.callable(*args, **kwargs)
-

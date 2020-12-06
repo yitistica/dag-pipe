@@ -16,9 +16,13 @@ each process: has a skip process
 function: able to loop over a function for x times;
 
 
+
 @process.init()
 @process.method()
 @process.add_preprocessor()
+@process.add_afterprocess()  # such as easily convert it into different format;
+@process.input()
+@process.expose_network()
 @process.func(*kernel_args, **kernel_kwargs, analyzer=(func1, func2))
 
 
@@ -30,7 +34,8 @@ process id is different from run time id, process id
 
 """
 
-from dag_pipe.core.kernel import Kernel, KernelCollection
+from dag_pipe.core.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
+from dag_pipe.core.kernel import KernelCollection
 from dag_pipe.core.process.argument import KernelArguments
 
 
@@ -39,8 +44,7 @@ class ProcessCollection(object):  # TEMP
 
 
 class ProcessComponent(object):
-    def __init__(self):
-        pass
+    pass
 
 
 class EmptyComponent(object):
@@ -57,10 +61,43 @@ class ProcessCore(object):
 
 
 class ProcessKernel(ProcessComponent):
-    def __init__(self, function_, kernel_type_):
-        super().__init__()
-        self.kernel = Kernel(function_)
-        self._kernel_type = None
+    def __new__(cls, callable_, type_, *args, **kwargs):
+        if type_ == 'function':
+            kernel_cls = FunctionKernel
+        elif type_ == 'init':
+            kernel_cls = InitKernel
+        elif type_ == 'method':
+            kernel_cls = MethodKernel
+        elif type_ == 'classmethod':
+            kernel_cls = ClassMethodKernel
+        elif type_ == 'staticmethod':
+            kernel_cls = StaticMethodKernel
+        else:
+            raise TypeError(f'Kernel type {type_} is not supported.')
+
+        if type_ in ['init', 'method', 'classmethod', 'staticmethod']:
+            method_name = kwargs.get('method_name')
+            if not method_name:
+                raise TypeError(f'method_name is not supplied for Kernel of type {type_}.')
+
+            kernel = kernel_cls(class_=callable_, method_name=method_name)
+        elif type_ in ['function']:
+            kernel = kernel_cls(callable_=callable_)
+        else:
+            raise TypeError(f'Kernel type {type_} is not supported.')
+
+        process_kernel = super().__new__(cls)
+        process_kernel._kernel = kernel
+        process_kernel._kernel_type = type_
+
+        return process_kernel
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @property
+    def kernel(self):
+        return self._kernel
 
     @property
     def kernel_id(self):
@@ -72,12 +109,9 @@ class ProcessKernel(ProcessComponent):
 
     @kernel_type.setter
     def kernel_type(self, type_):
-        pass
+        raise NotImplementedError()
 
-
-
-
-    def exec(self, *args, **kwargs):
+    def run(self, *args, **kwargs):
         return self.kernel.callable(*args, **kwargs)
 
 
@@ -94,12 +128,24 @@ class Process(ProcessCore):
     def __init__(self, **kwargs):
         super().__init__()
 
-        self.arguments = ProcessArguments()
-        self.kernel = EmptyComponent()
+        callable_ = kwargs.get('callable_')
+        type_ = kwargs.get('type_')
+        if callable_ and type_:
+            self.add_kernel(callable_=callable_, type_=type_)
+        else:
+            self._kernel = EmptyComponent()
+
+        self.arguments = EmptyComponent()
+
+    def add_kernel(self, callable_, type_):
+        self._kernel = ProcessKernel(callable_, type_)
+
+    def add_arguments(self, argument_type, *args, **kwargs):
+        pass
 
 
-
-
+class SubProcess(object):
+    pass
 
 
 class ProcessRunTime(object):  # separate, some only init once,

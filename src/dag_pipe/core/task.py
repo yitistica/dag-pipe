@@ -73,35 +73,7 @@ class TaskRunner(object):
         pass
 
 
-class UpStreamProcess(object):
-    pass
 
-
-class DownStreamProcess(object):
-    pass
-
-
-class ProcessInput(object):
-    def __init__(self):
-        pass
-
-    def validate(self):
-        pass
-
-
-class ProcessResult(object):
-    def __init__(self):
-        pass
-
-
-class ProcessData(ProcessInput):
-    def __init__(self):
-        super().__init__()
-
-
-class ProcessParameters(ProcessInput):
-    def __init__(self):
-        super().__init__()
 
 
 
