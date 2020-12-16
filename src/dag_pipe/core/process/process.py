@@ -133,12 +133,12 @@ class Process(ProcessCore):
         if callable_ and type_:
             self.add_kernel(callable_=callable_, type_=type_)
         else:
-            self._kernel = EmptyComponent()
+            self._process_kernel = EmptyComponent()
 
         self.arguments = EmptyComponent()
 
     def add_kernel(self, callable_, type_):
-        self._kernel = ProcessKernel(callable_, type_)
+        self._process_kernel = ProcessKernel(callable_, type_)
 
     def add_arguments(self, argument_type, *args, **kwargs):
         pass
