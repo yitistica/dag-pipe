@@ -17,7 +17,7 @@ function: able to loop over a function for x times;
 
 
 
-@process.init()
+@process.init()  # dependent init, or at start init;
 @process.method()
 @process.add_preprocessor()
 @process.add_afterprocess()  # such as easily convert it into different format;
@@ -179,7 +179,6 @@ class Gaussian(object):
         return c + 2
 
 
-
 def add_class(cls):
     if 'a' in KernelCollection.kernels:
         KernelCollection.kernels['b'] = cls  # wrap the class
@@ -188,11 +187,6 @@ def add_class(cls):
     return cls
 
 
-Kernel(Gaussian.method_a)
 
-print(KernelCollection.kernels)
-
-
-Kernel(Gaussian.method_a)
 
 print(KernelCollection.kernels)

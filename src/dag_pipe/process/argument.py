@@ -24,8 +24,8 @@ from collections import OrderedDict
 import inspect
 import itertools
 
-from dag_pipe.core.utils.types import check_is_iterable
-from dag_pipe.core.utils.types import check_container_class
+from dag_pipe.utils.types import check_is_iterable
+from dag_pipe.utils.types import check_container_class
 
 
 class EmptyArgument(object):
