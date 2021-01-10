@@ -1,7 +1,3 @@
-"""
-conditional validator?
-"""
-
 
 class PassValidation(object):
     pass
@@ -50,14 +46,3 @@ class ValidatorSet(object):
     def validate(self, value):
         for validator in self.validators:
             validator.validate(value)
-
-
-def type_validator(value, value_type):
-    if value_type == 'str':
-        if not isinstance(value, str):
-            raise FailedValidationError()
-
-
-type_validator = Validator(type_validator, type_='both', value_type='str')
-
-type_validator.validate('abc')

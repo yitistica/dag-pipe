@@ -1,6 +1,6 @@
 """
 net: a set of processes;
-core: a core consists of input:
+compartment: a compartment consists of input:
 
 
 space: [];
