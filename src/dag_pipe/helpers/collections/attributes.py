@@ -1,14 +1,3 @@
-"""
-
-set default
-
-
-validate:
-
-enforce:
-
-
-"""
 from collections.abc import MutableMapping
 
 
@@ -24,7 +13,13 @@ class ImmutableFieldError(Exception):  # TEMP
         super().__init__(message)
 
 
-class Attribute(MutableMapping):
+class NullFieldError(Exception):  # TEMP
+    def __init__(self, field):
+        message = f'field name <{field}> is not null.'
+        super().__init__(message)
+
+
+class AttributeBase(MutableMapping):
     def __init__(self, attributes=()):
         self._attris = dict()
         self.update(attributes)
@@ -58,33 +53,44 @@ class Attribute(MutableMapping):
         return len(self._attris)
 
 
+class GetAttrMixin(object):
+    def __getattr__(self, field):
+        return self._get_field(field)
+
+
 class ImmutableFieldMixin(object):
     def __init__(self, fields):
         self._immutable_fields = fields
 
-    def _check_field(self, field, value):
+    @property
+    def immutable_fields(self):
+        return self._immutable_fields
+
+    def _check_immutable(self, field):
         if (field in self._immutable_fields) and (field in self.attris):
             raise ImmutableFieldError(field)
-        else:
-            pass
 
 
-class GetAttrMixin(object):
-    def __getattr__(self, field):
-        if hasattr(self, field):
-            raise ObjectAttributeOccupiedError(field=field)
+class NotNullFieldMixin(object):
+    def __init__(self, fields):
+        if not fields:
+            fields = list()
+        self._not_null_fields = fields
 
-        return self[field]
+    @property
+    def immutable_fields(self):
+        return self._not_null_fields
+
+    def _check_null(self, field):
+        if (field in self._not_null_fields) and (field in self.attris):
+            raise NullFieldError(field)
 
 
-class SuperAttribute(ImmutableFieldMixin, Attribute):
+class Attributes(AttributeBase, GetAttrMixin, ImmutableFieldMixin):
     def __init__(self, attributes=(), immutable_fields=None):
         ImmutableFieldMixin.__init__(self, fields=immutable_fields)
-        Attribute.__init__(self, attributes=attributes)
+        AttributeBase.__init__(self, attributes=attributes)
 
-
-if __name__ == '__main__':
-    attr = SuperAttribute({'a': 1, 'b': 2}, immutable_fields=['a'])
-    attr['a'] = 2
-
-
+    def _set_field(self, field, value):
+        self._check_immutable(field)
+        AttributeBase._set_field(self, field, value)

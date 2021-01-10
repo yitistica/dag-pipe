@@ -18,9 +18,3 @@ TreeDict
 
 """
 
-from collections.abc import MutableMapping
-from collections import OrderedDict
-
-
-class Container(MutableMapping):
-    pass
