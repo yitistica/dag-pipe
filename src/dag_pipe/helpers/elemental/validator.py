@@ -34,14 +34,17 @@ class Validator(object):
 class ValidatorSet(object):
     def __init__(self, *validators):
         self.validators = []
-        for validator in validators:
-            self.add_validator(validator=validator)
+        self.add_validators(*validators)
 
-    def add_validator(self, validator):
-        if not isinstance(validator, Validator):
-            raise TypeError(f"object {validator} is not an instance of Validator.")
-        else:
-            self.validators.append(validator)
+    def add_validators(self, *validators):
+        for validator in validators:
+            if isinstance(validator, Validator):
+                self.validators.append(validator)
+            if isinstance(validator, ValidatorSet):
+                for _validator in validator.validators:
+                    self.validators.append(_validator)
+            else:
+                raise TypeError(f"object {validator} is not an instance of Validator or ValidatorSet.")
 
     def validate(self, value):
         for validator in self.validators:

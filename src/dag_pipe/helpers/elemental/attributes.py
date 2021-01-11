@@ -88,6 +88,8 @@ class NotNullFieldMixin(object):
 
 class Attributes(AttributeBase, GetAttrMixin, ImmutableFieldMixin):
     def __init__(self, attributes=(), immutable_fields=None):
+        if not immutable_fields:
+            immutable_fields = []
         ImmutableFieldMixin.__init__(self, fields=immutable_fields)
         AttributeBase.__init__(self, attributes=attributes)
 

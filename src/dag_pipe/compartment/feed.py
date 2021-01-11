@@ -1,24 +1,32 @@
 from dag_pipe.helpers.elemental.element import Element
 from dag_pipe.helpers.elemental.attributes import Attributes
+from dag_pipe.compartment.validators import check_type
 
 
 _PLACEHOLDER_VAR_NAME = 'place_holder'
+_PARAM_VAR_NAME = 'param'
 
 
 class AnyValue(object):
     pass
 
 
-class PlaceHolder(Element):
-    def __init__(self, attribute_dict=None, validators=None):
+class EmptyValue(object):
+    pass
+
+
+class Feed(Element):
+    def __init__(self, value, **attributes):
+        attributes = Attributes(attributes)
+        super().__init__(value=value, attributes=attributes)
+
+
+class PlaceHolder(Feed):
+    def __init__(self, **attributes):
         value = AnyValue
 
-        if attribute_dict is None:
-            attribute_dict = dict()
-
-        attribute_dict = {_PLACEHOLDER_VAR_NAME: True, **attribute_dict}
-        attributes = Attributes(attributes=attribute_dict, immutable_fields=[])
-        super().__init__(value=value, attributes=attributes, validators=validators)
+        attributes = {_PLACEHOLDER_VAR_NAME: True, **attributes}
+        super().__init__(value=value, **attributes)
 
     def set_value(self, value):
         self.validate(value=value)
