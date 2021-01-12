@@ -1,34 +1,44 @@
 
-class PassValidation(object):
-    pass
+from abc import abstractmethod, ABCMeta
 
 
-class FailedValidationError(Exception):  # TEMP
-    def __init__(self):
-        message = f'failed validation.'
-        super().__init__(message)
+def validator_factory(validator_name, callable_, **defaults):
+
+    def validator_method(self, value, **kwargs):
+        validation = callable_(value, **kwargs)
+        return validation
+
+    preset_params = defaults
+
+    attributedict = {'preset_params': preset_params,  # change this if class attribute preset_params is renamed
+                     Validator.validator.__name__: validator_method
+                     }
+
+    validator_class = type(validator_name, (Validator, ), attributedict)
+
+    return validator_class
 
 
-class Validator(object):
-    def __init__(self, validation_callable=None, **params):
-        self.validation_callable = PassValidation
-        if params:
-            self.params = params
-        else:
-            self.params = dict()
+class Validator(object, metaclass=ABCMeta):
+    preset_params = dict()
 
-        if validation_callable:
-            self.add_validation(validation_callable=validation_callable)
+    def __init__(self, **params):
+        params = {**self.__class__.preset_params, **params}
+        self._params = params
 
-    def add_validation(self, validation_callable):
-        if not callable(validation_callable):
-            raise TypeError(f'{validation_callable} is not a callable.')
-        else:
-            self.validation_callable = validation_callable
+    @property
+    def params(self):
+        return self._params
+
+    @abstractmethod
+    def validator(self, value, **kwargs):
+        raise NotImplementedError()
 
     def validate(self, value):
-        if self.validation_callable is not PassValidation:
-            self.validation_callable(value, **self.params)
+        return self.validator(value=value, **self.params)
+
+    def __call__(self, value):
+        self.validate(value=value)
 
 
 class ValidatorSet(object):
