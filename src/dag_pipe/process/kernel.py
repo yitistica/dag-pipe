@@ -7,8 +7,8 @@ for each class:
     but each callable means a method rather than the whole class;
 
 """
-from dag_pipe.core.helpers.kernel_meta import build_function_meta, build_method_meta, serialize_kernel_meta
-from dag_pipe.core.utils.types import hash_string, check_is_function, check_is_class
+from dag_pipe.helpers.kernel_meta import build_function_meta, build_method_meta, serialize_kernel_meta
+from dag_pipe.utils.types import hash_string, check_is_function, check_is_class
 
 _HASH_PRECISION = 7
 

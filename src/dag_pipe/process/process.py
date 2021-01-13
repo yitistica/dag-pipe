@@ -34,9 +34,9 @@ process id is different from run time id, process id
 
 """
 
-from dag_pipe.core.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
-from dag_pipe.core.kernel import KernelCollection
-from dag_pipe.core.process.argument import KernelArguments
+from dag_pipe.process.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
+from dag_pipe.process.kernel import KernelCollection
+from dag_pipe.process.argument import KernelArguments
 
 
 class ProcessCollection(object):  # TEMP

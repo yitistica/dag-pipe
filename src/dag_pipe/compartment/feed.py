@@ -4,11 +4,9 @@ from dag_pipe.compartment.validators import BasicTypeValidator
 
 
 _FEED_TYPE_PLACEHOLDER = 'placeholder'
+_FEED_TYPE_PLACEHOLDER_DATAFRAME = 'dataframe_holder'
 _FEED_TYPE_PARAM = 'param'
-
-# data types:
-_DATA_TYPE_FIELD_NAME = 'data_type'
-_DATA_TYPE_VALUE_CONFIG = 'config'
+_FEED_TYPE_CONFIG = 'config'
 
 
 class AnyValue(object):
@@ -47,7 +45,7 @@ class PlaceHolder(Feed):
 
 class Param(Feed):
     meta_dict = {'type': _FEED_TYPE_PARAM}
-    _expected_types_container = (list, tuple)
+    _expected_types_container = (list, tuple, set)
     _param_value_type_var_name = 'value_type'
 
     def __init__(self, value, **attributes):
@@ -65,8 +63,14 @@ class Param(Feed):
 
 
 class Config(Param):
-    meta_dict = {'type': _DATA_TYPE_VALUE_CONFIG}
+    meta_dict = {'type': _FEED_TYPE_CONFIG}
 
     def __init__(self, value, **attributes):
         super().__init__(value=value, **attributes)
 
+
+class DataFrameHolder(PlaceHolder):
+    meta_dict = {'type': _FEED_TYPE_PLACEHOLDER_DATAFRAME}
+
+    def __init__(self, value, **attributes):
+        super().__init__(value=value, **attributes)

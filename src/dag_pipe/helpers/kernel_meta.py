@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from dag_pipe.core.utils.types import locate_object
+from dag_pipe.utils.types import locate_object
 
 
 def build_function_meta(function_):
