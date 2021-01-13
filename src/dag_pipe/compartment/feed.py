@@ -3,8 +3,8 @@ from dag_pipe.helpers.elemental.attributes import Attributes
 from dag_pipe.compartment.validators import BasicTypeValidator
 
 
-feed_type_value_placeholder = 'placeholder'
-feed_type_value_param = 'param'
+_FEED_TYPE_PLACEHOLDER = 'placeholder'
+_FEED_TYPE_PARAM = 'param'
 
 # data types:
 _DATA_TYPE_FIELD_NAME = 'data_type'
@@ -20,11 +20,10 @@ class EmptyValue(object):
 
 
 class Feed(Element):
-    _meta_dict = {'type': 'feed'}
-    meta = Attributes(_meta_dict)
+    meta_dict = {'type': 'feed'}
 
     def __init__(self, value, **attributes):
-        self._meta = None
+        self._meta = Attributes(self.meta_dict)
 
         attributes = Attributes(attributes)
         super().__init__(value=value, attributes=attributes)
@@ -35,10 +34,10 @@ class Feed(Element):
 
 
 class PlaceHolder(Feed):
+    meta_dict = {'type': _FEED_TYPE_PLACEHOLDER}
+
     def __init__(self, **attributes):
         value = AnyValue
-
-        attributes = {feed_type_field_name: feed_type_value_placeholder, **attributes}
         super().__init__(value=value, **attributes)
 
     def set_value(self, value):
@@ -47,16 +46,16 @@ class PlaceHolder(Feed):
 
 
 class Param(Feed):
-    expected_types_container = (list, tuple)
-    param_value_type_var_name = 'value_type'
+    meta_dict = {'type': _FEED_TYPE_PARAM}
+    _expected_types_container = (list, tuple)
+    _param_value_type_var_name = 'value_type'
 
     def __init__(self, value, **attributes):
-        attributes = {feed_type_field_name: feed_type_value_param, **attributes}
         super().__init__(value=value, **attributes)
 
-        if Param.param_value_type_var_name in self:
-            expected_types = self.attributes[Param.param_value_type_var_name]
-            if isinstance(expected_types, Param.expected_types_container):
+        if self._param_value_type_var_name in self.attributes:
+            expected_types = self.attributes[Param._param_value_type_var_name]
+            if isinstance(expected_types, self._expected_types_container):
                 pass
             else:
                 expected_types = [expected_types]
@@ -66,7 +65,8 @@ class Param(Feed):
 
 
 class Config(Param):
+    meta_dict = {'type': _DATA_TYPE_VALUE_CONFIG}
+
     def __init__(self, value, **attributes):
-        attributes = {_DATA_TYPE_FIELD_NAME: _DATA_TYPE_VALUE_CONFIG, **attributes}
         super().__init__(value=value, **attributes)
 
