@@ -16,7 +16,7 @@ class UnmatchedDataTypeError(Exception):
 
 
 class BasicTypeValidator(Validator):
-    def validator(self, value, expected_type):
+    def validator(self, value, expected_types):
         type_ = check_data_type(value)
-        if type_ and (expected_type != type_):
-            raise UnmatchedDataTypeError(expected_type=expected_type, given_type=type_)
+        if type_ and (type_ not in expected_types):
+            raise UnmatchedDataTypeError(expected_type=expected_types, given_type=type_)

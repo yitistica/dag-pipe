@@ -94,6 +94,9 @@ class Element(ElementBase):
     def validate(self, value):
         self.validator_set.validate(value=value)
 
+    def self_validate(self):
+        self.validator_set.validate(value=self.value)
+
     def _add_component(self, component):
         if isinstance(component, Attributes):
             self.add_attributes(attributes=component)

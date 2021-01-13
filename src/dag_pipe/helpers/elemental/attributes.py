@@ -52,6 +52,9 @@ class AttributeBase(MutableMapping):
     def __len__(self):
         return len(self._attris)
 
+    def __contains__(self, field):
+        return field in self._attris
+
 
 class GetAttrMixin(object):
     def __getattr__(self, field):

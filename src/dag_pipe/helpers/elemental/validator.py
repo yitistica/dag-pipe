@@ -50,7 +50,7 @@ class ValidatorSet(object):
         for validator in validators:
             if isinstance(validator, Validator):
                 self.validators.append(validator)
-            if isinstance(validator, ValidatorSet):
+            elif isinstance(validator, ValidatorSet):
                 for _validator in validator.validators:
                     self.validators.append(_validator)
             else:

@@ -1,5 +1,6 @@
 from dag_pipe.helpers.elemental.element import Element
 from dag_pipe.helpers.elemental.attributes import Attributes
+from dag_pipe.compartment.validators import BasicTypeValidator
 
 
 _FEED_TYPE_FIELD_NAME = '_type'
@@ -45,12 +46,18 @@ class PlaceHolder(Feed):
 
 
 class Param(Feed):
+    expected_types_container = (list, tuple)
+
     def __init__(self, value, **attributes):
-
         attributes = {_FEED_TYPE_FIELD_NAME: _FEED_TYPE_VALUE_PARAM, **attributes}
-        attributes = Attributes(attributes)
+        super().__init__(value=value, **attributes)
 
-        super().__init__(value=value, attributes=attributes)
+        if _PARAM_VALUE_TYPE_VAR_NAME in self:
+            expected_types = self.attributes[_PARAM_VALUE_TYPE_VAR_NAME]
+            if isinstance(expected_types, Param.expected_types_container):
+                pass
+            else:
+                expected_types = [expected_types]
+            validator = BasicTypeValidator(expected_types=expected_types)
+            self.add_validators(validator)
 
-        if _PARAM_VALUE_TYPE_VAR_NAME in self.attributes:
-            pass  # TODO: add validator
