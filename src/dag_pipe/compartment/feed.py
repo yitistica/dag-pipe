@@ -3,12 +3,12 @@ from dag_pipe.helpers.elemental.attributes import Attributes
 from dag_pipe.compartment.validators import BasicTypeValidator
 
 
-_FEED_TYPE_FIELD_NAME = '_type'
-_FEED_TYPE_VALUE_DEFAULT = 'feed'
-_FEED_TYPE_VALUE_PLACEHOLDER = 'placeholder'
-_FEED_TYPE_VALUE_PARAM = 'param'
+feed_type_value_placeholder = 'placeholder'
+feed_type_value_param = 'param'
 
-_PARAM_VALUE_TYPE_VAR_NAME = 'value_type'
+# data types:
+_DATA_TYPE_FIELD_NAME = 'data_type'
+_DATA_TYPE_VALUE_CONFIG = 'config'
 
 
 class AnyValue(object):
@@ -20,24 +20,25 @@ class EmptyValue(object):
 
 
 class Feed(Element):
-    def __init__(self, value, **attributes):
+    _meta_dict = {'type': 'feed'}
+    meta = Attributes(_meta_dict)
 
-        if _FEED_TYPE_FIELD_NAME not in attributes:
-            attributes = {_FEED_TYPE_FIELD_NAME: _FEED_TYPE_VALUE_DEFAULT, **attributes}
+    def __init__(self, value, **attributes):
+        self._meta = None
 
         attributes = Attributes(attributes)
         super().__init__(value=value, attributes=attributes)
 
     @property
-    def type(self):
-        return self.attributes[_FEED_TYPE_FIELD_NAME]
+    def meta(self):
+        return self._meta
 
 
 class PlaceHolder(Feed):
     def __init__(self, **attributes):
         value = AnyValue
 
-        attributes = {_FEED_TYPE_FIELD_NAME: _FEED_TYPE_VALUE_PLACEHOLDER, **attributes}
+        attributes = {feed_type_field_name: feed_type_value_placeholder, **attributes}
         super().__init__(value=value, **attributes)
 
     def set_value(self, value):
@@ -47,17 +48,25 @@ class PlaceHolder(Feed):
 
 class Param(Feed):
     expected_types_container = (list, tuple)
+    param_value_type_var_name = 'value_type'
 
     def __init__(self, value, **attributes):
-        attributes = {_FEED_TYPE_FIELD_NAME: _FEED_TYPE_VALUE_PARAM, **attributes}
+        attributes = {feed_type_field_name: feed_type_value_param, **attributes}
         super().__init__(value=value, **attributes)
 
-        if _PARAM_VALUE_TYPE_VAR_NAME in self:
-            expected_types = self.attributes[_PARAM_VALUE_TYPE_VAR_NAME]
+        if Param.param_value_type_var_name in self:
+            expected_types = self.attributes[Param.param_value_type_var_name]
             if isinstance(expected_types, Param.expected_types_container):
                 pass
             else:
                 expected_types = [expected_types]
             validator = BasicTypeValidator(expected_types=expected_types)
             self.add_validators(validator)
+            self.self_validate()
+
+
+class Config(Param):
+    def __init__(self, value, **attributes):
+        attributes = {_DATA_TYPE_FIELD_NAME: _DATA_TYPE_VALUE_CONFIG, **attributes}
+        super().__init__(value=value, **attributes)
 
