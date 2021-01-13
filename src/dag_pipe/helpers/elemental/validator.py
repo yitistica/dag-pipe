@@ -21,6 +21,7 @@ def validator_factory(validator_name, callable_, **defaults):
 
 class Validator(object, metaclass=ABCMeta):
     preset_params = dict()
+    expose_params = []
 
     def __init__(self, **params):
         params = {**self.__class__.preset_params, **params}
@@ -29,6 +30,12 @@ class Validator(object, metaclass=ABCMeta):
     @property
     def params(self):
         return self._params
+
+    @property
+    def summary(self):
+        validator_sumary = {'name': self.__class__.__name__,
+                            'params': self.params}
+        return validator_sumary
 
     @abstractmethod
     def validator(self, value, **kwargs):
@@ -59,3 +66,10 @@ class ValidatorSet(object):
     def validate(self, value):
         for validator in self.validators:
             validator.validate(value)
+
+    @property
+    def summary(self):
+        summary = []
+        for validator in self.validators:
+            summary.append(validator.summary)
+        return summary

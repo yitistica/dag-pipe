@@ -23,9 +23,9 @@ class UnfoundDataFrameColumnsError(Exception):
 
 
 class UnmatchedDataFrameSizeError(Exception):
-    def __init__(self, dimension, expected_size, given_size, test_type):
-        message = f'test on <{dimension}> of <{given_size}> size does not match the expected size <{expected_size}> by' \
-                  f'test <{test_type}>.'
+    def __init__(self, row_or_col, expected_size, given_size, test_type):
+        message = f"Test for (actual_size {test_type} expected_size) on the size of dataframe's <{row_or_col}>: " \
+                  f"given size <{given_size}>, does not match the expected size <{expected_size}>."
         super().__init__(message)
 
 
@@ -37,6 +37,8 @@ class BasicTypeValidator(Validator):
 
 
 class DataFrameValidator(Validator):
+    expose_params = ['columns', 'row_size', 'col_size', 'row_test', 'col_test']
+
     @staticmethod
     def _check_if_data_frame(value):
         if not isinstance(value, pd.DataFrame):
@@ -60,10 +62,10 @@ class DataFrameValidator(Validator):
         actual_row_size, actual_col_size = value.shape
 
         raise_result = False
-        for dimension, compare_tuple in enumerate([(actual_row_size, row_size, row_test),
-                                                 (actual_col_size, col_size, col_test)]):
+        for compare_tuple in [('row', actual_row_size, row_size, row_test),
+                              ('column', actual_col_size, col_size, col_test)]:
 
-            actual_size, expected_size, test = compare_tuple
+            row_or_col, actual_size, expected_size, test = compare_tuple
             if expected_size:
                 if test == '==':
                     if not (actual_size == expected_size):
@@ -84,7 +86,7 @@ class DataFrameValidator(Validator):
                     raise NotImplementedError(f'test <{test} is not implemented.')
 
                 if raise_result:
-                    raise UnmatchedDataFrameSizeError(dimension=dimension, expected_size=expected_size,
+                    raise UnmatchedDataFrameSizeError(row_or_col=row_or_col, expected_size=expected_size,
                                                       given_size=actual_size, test_type=test)
 
     def validator(self, value, **kwargs):

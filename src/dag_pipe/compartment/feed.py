@@ -1,12 +1,14 @@
 from dag_pipe.helpers.elemental.element import Element
 from dag_pipe.helpers.elemental.attributes import Attributes
-from dag_pipe.compartment.validators import BasicTypeValidator
+from dag_pipe.compartment.validators import BasicTypeValidator, DataFrameValidator
 
 
 _FEED_TYPE_PLACEHOLDER = 'placeholder'
 _FEED_TYPE_PLACEHOLDER_DATAFRAME = 'dataframe_holder'
 _FEED_TYPE_PARAM = 'param'
 _FEED_TYPE_CONFIG = 'config'
+
+_VALIDATOR_PARAMS_ATTRIBUTE_FIELD_NAME = '_validator_params'
 
 
 class AnyValue(object):
@@ -30,6 +32,9 @@ class Feed(Element):
     def meta(self):
         return self._meta
 
+    def validatiors_settings(self):
+        return self.validator_set.summary
+
 
 class PlaceHolder(Feed):
     meta_dict = {'type': _FEED_TYPE_PLACEHOLDER}
@@ -40,7 +45,7 @@ class PlaceHolder(Feed):
 
     def set_value(self, value):
         self.validate(value=value)
-        self.set_value(value=value)
+        super().set_value(value=value)
 
 
 class Param(Feed):
@@ -72,5 +77,18 @@ class Config(Param):
 class DataFrameHolder(PlaceHolder):
     meta_dict = {'type': _FEED_TYPE_PLACEHOLDER_DATAFRAME}
 
-    def __init__(self, value, **attributes):
-        super().__init__(value=value, **attributes)
+    def __init__(self, **attributes):
+
+        validator_params = dict()
+        _attributes = dict()
+        for attri_field, attri_value in attributes.items():
+            if attri_field in DataFrameValidator.expose_params:
+                validator_params[attri_field] = attri_value
+            else:
+                _attributes[attri_field] = attri_value
+
+        _attributes = {**_attributes, _VALIDATOR_PARAMS_ATTRIBUTE_FIELD_NAME: validator_params}
+
+        super().__init__(**_attributes)
+        validator = DataFrameValidator(**validator_params)
+        self.add_validators(validator)
