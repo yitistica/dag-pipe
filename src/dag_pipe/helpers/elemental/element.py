@@ -72,9 +72,6 @@ class ElementBase(object):
     def __contains__(self, field):
         return field in self.attributes
 
-    def __add__(self, attributes):
-        self.add_attributes(attributes=attributes)
-
 
 class Element(ElementBase):
     def __init__(self, value, attributes=None, validators=None):

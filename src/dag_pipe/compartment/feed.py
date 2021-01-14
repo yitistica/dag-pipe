@@ -1,5 +1,5 @@
 from dag_pipe.helpers.elemental.element import Element
-from dag_pipe.helpers.elemental.attributes import Attributes
+from dag_pipe.compartment.attributes import FeedMetaAttributes, FeedAttributes
 from dag_pipe.compartment.validators import BasicTypeValidator, DataFrameValidator
 
 
@@ -23,16 +23,16 @@ class Feed(Element):
     meta_dict = {'type': 'feed'}
 
     def __init__(self, value, **attributes):
-        self._meta = Attributes(self.meta_dict)
+        self._meta = FeedMetaAttributes(**self.meta_dict)
 
-        attributes = Attributes(attributes)
+        attributes = FeedAttributes(attributes)
         super().__init__(value=value, attributes=attributes)
 
     @property
     def meta(self):
         return self._meta
 
-    def validatiors_settings(self):
+    def validators_setting(self):
         return self.validator_set.summary
 
 
@@ -81,6 +81,7 @@ class DataFrameHolder(PlaceHolder):
 
         validator_params = dict()
         _attributes = dict()
+        # regroup attributes that belong to validators;
         for attri_field, attri_value in attributes.items():
             if attri_field in DataFrameValidator.expose_params:
                 validator_params[attri_field] = attri_value

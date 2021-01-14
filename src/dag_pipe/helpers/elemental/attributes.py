@@ -13,9 +13,15 @@ class ImmutableFieldError(Exception):  # TEMP
         super().__init__(message)
 
 
-class NullFieldError(Exception):  # TEMP
+class FieldNotExistError(Exception):  # TEMP
     def __init__(self, field):
-        message = f'field name <{field}> is not null.'
+        message = f'field <{field}> does not exist.'
+        super().__init__(message)
+
+
+class NullFieldError(Exception):  # TEMP
+    def __init__(self, field, value):
+        message = f'field <{field}> is a null value (<{value}>).'
         super().__init__(message)
 
 
@@ -80,13 +86,19 @@ class NotNullFieldMixin(object):
             fields = list()
         self._not_null_fields = fields
 
-    @property
-    def immutable_fields(self):
-        return self._not_null_fields
+    def _check_exist(self, field):
+        if not ((field in self._not_null_fields) and (field in self.attris)):
+            raise FieldNotExistError(field)
 
-    def _check_null(self, field):
-        if (field in self._not_null_fields) and (field in self.attris):
-            raise NullFieldError(field)
+    def _check_null(self, field, null_forms=None):
+        self._check_exist(field=field)
+
+        if (not null_forms) and isinstance(null_forms, (list, set, tuple)):
+            raise TypeError(f"null forms <{null_forms}> is empty or not a list, set or tuple.")
+
+        value = self.attris.get(field)
+        if value in null_forms:
+            raise NullFieldError(field=field, value=value)
 
 
 class Attributes(AttributeBase, GetAttrMixin, ImmutableFieldMixin):

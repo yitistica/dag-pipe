@@ -7,7 +7,3 @@ class FeedMetaAttributes(Attributes):
 
 class FeedAttributes(Attributes):
     pass
-
-
-
-FeedMetaAttributes(attributes={'a':3})
