@@ -58,10 +58,3 @@ class MappingDict(MutableMapping):
         return key in self._dict
 
 
-class OrderDict(MappingDict):
-    pass
-
-
-_dict = MappingDict({'a': 1})
-
-print(_dict.get('a'))

@@ -3,8 +3,9 @@
 location hash;
 """
 from dag_pipe.helpers.elemental.attributes import AttributeBase, NotNullFieldMixin
+from dag_pipe.helpers.collections.containers import MappingDict
 
-_KERNEL_NULL_FORM = [None, '']
+_KERNEL_NULL_FORM = [None, ]
 
 
 class KernelAttributes(AttributeBase, NotNullFieldMixin):
