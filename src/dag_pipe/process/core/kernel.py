@@ -8,6 +8,12 @@ from dag_pipe.helpers.collections.containers import MappingDict
 _KERNEL_NULL_FORM = [None, ]
 
 
+class OccupiedKernelIDError(Exception):
+    def __init__(self, kernel_id):
+        message = f'Kernel by the id <{kernel_id}> is taken, cannot be reset.'
+        super().__init__(message)
+
+
 class KernelAttributes(AttributeBase, NotNullFieldMixin):
     def __init__(self, meta=(), not_null_fields=None, null_forms=None):
 
@@ -23,20 +29,42 @@ class KernelAttributes(AttributeBase, NotNullFieldMixin):
             self._check_null(field=field, null_forms=null_forms)
 
 
+class KernelStorage(MappingDict):
+    def __init__(self, **kernel_dict):
+        super().__init__()
+
+        for kernel_id, kernel in kernel_dict.items():
+            self[kernel_id] = kernel
+
+    def _set(self, kernel_id, kernel):
+        super()._set(key=kernel_id, value=kernel)
+
+    def __contains__(self, kernel_id):
+        return super().__contains__(key=kernel_id)
+
+
 class KernelNamespace(object):
-    kernels = dict()
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls)
 
-    def __new__(cls, namespace, *args, **kwargs):
-        pass
+    def __init__(self):
+        self.kernels = KernelStorage()
 
-    def __init__(self, namespace):
-        pass
+    def add_kernel(self, kernel):
+        kernel_id = kernel.id
+        if kernel_id not in self:
+            self.kernels[kernel_id] = kernel
+        else:
+            raise OccupiedKernelIDError(kernel_id=kernel_id)
 
-    def add_kernel(self, ):
-        pass
+    def get_kernel(self, kernel_id):
+        return self.kernels[kernel_id]
 
-    def get_kernel(self, id_):
-        pass
+    def __contains__(self, kernel):
+        if isinstance(kernel, Kernel):
+            return kernel.id in self.kernels
+        else:
+            return kernel in self.kernels
 
 
 class Kernel(object):
