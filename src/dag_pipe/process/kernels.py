@@ -9,7 +9,7 @@ for each class:
 """
 from dag_pipe.helpers.kernel_meta import build_function_meta, build_method_meta, serialize_kernel_meta
 from dag_pipe.utils.types import hash_string, check_is_function, check_is_class
-
+from dag_pipe.process.core.kernel import Kernel
 _HASH_PRECISION = 7
 
 
@@ -30,48 +30,19 @@ class MethodNotImplementError(Exception):
             return 'MethodNotFoundError has been raised'
 
 
-class KernelCollection(object):  # TEMP
-    kernels = dict()
-
-
-class Kernel(object):
-    def __new__(cls, callable_, kernel_meta, *args, **kwargs):
-        id_ = _hash_kernel_meta(meta=kernel_meta)
-        kernel = KernelCollection.kernels.get(id_)
-
-        if not kernel:
-            kernel = super().__new__(cls)
-            kernel._id = id_
-            kernel.kernel_meta = kernel_meta
-            kernel._callable = callable_
-            KernelCollection.kernels[kernel._id] = kernel
-        else:
-            pass
-
-        return kernel
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def callable(self):
-        return self._callable
-
-    def call(self, *args, **kwargs):
-        return self.callable(*args, **kwargs)
-
-
 class FunctionKernel(Kernel):
     def __new__(cls, callable_, *args, **kwargs):
 
         if not check_is_function(object_=callable_):
             raise TypeError(f"callable_ ({callable_}) by type ({type(callable_)}) is not a function.")
+
         kernel_meta = build_function_meta(callable_)
-        kernel = super().__new__(cls, callable_=callable_, kernel_meta=kernel_meta, *args, **kwargs)
+        attributes = kwargs.pop('attributes', None)
+        if not attributes:
+            attributes = dict()
+        attributes = {**attributes, **kernel_meta}
+
+        kernel = super().__new__(cls, callable_=callable_, attributes=attributes, *args, **kwargs)
 
         return kernel
 
@@ -88,8 +59,14 @@ class ClassKernel(Kernel):
             raise TypeError(f"__init__() missing 1 required keyword argument: 'method'. ")
 
         callable_ = ClassKernel._verify_method(class_=class_, method_name=method_name)
+
         kernel_meta = build_method_meta(class_=class_, method_name=method_name)
-        kernel = super().__new__(cls, callable_=callable_, kernel_meta=kernel_meta, *args, **kwargs)
+        attributes = kwargs.pop('attributes', None)
+        if not attributes:
+            attributes = dict()
+        attributes = {**attributes, **kernel_meta}
+
+        kernel = super().__new__(cls, callable_=callable_, attributes=attributes, *args, **kwargs)
         kernel._class = class_
         return kernel
 
@@ -108,7 +85,12 @@ class ClassKernel(Kernel):
 
 class InitKernel(ClassKernel):
     def __new__(cls, class_, *args, **kwargs):
-        kernel = super().__new__(cls, class_=class_, method_name='__init__', *args, **kwargs)
+
+        attributes = kwargs.pop('attributes', None)
+        if not attributes:
+            attributes = dict()
+
+        kernel = super().__new__(cls, class_=class_, method_name='__init__', attributes=attributes, *args, **kwargs)
         return kernel
 
     def __init__(self, *args, **kwargs):
@@ -161,3 +143,4 @@ class ClassMethodKernel(ClassKernel):
 class StaticMethodKernel(ClassKernel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
