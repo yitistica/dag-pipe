@@ -143,17 +143,6 @@ class ArgumentCollectionIterator(object):
             raise TypeError(f'type {self._type} is not supported.')
 
 
-class DefaultArguments(Kwargs):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def if_empty(self):
-        if self.kwargs == dict():
-            return True
-        else:
-            return False
-
-
 class ArgumentsCore(Args, Kwargs):
     def __init__(self, *args, **kwargs):
         Args.__init__(self, *args)
@@ -178,24 +167,10 @@ class ArgumentsCore(Args, Kwargs):
 class Arguments(ArgumentsCore):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.default_arguments = DefaultArguments()
-
-    def add_default_arguments(self, default_argument_dict):
-        self.default_arguments.add_kwargs(**default_argument_dict)
-
-    def _fill_kwargs_with_default(self):
-        merged_kwargs = {**self.kwargs}
-        for key, default_value in self.default_arguments.kwargs.items():
-            if key in self.kwargs:
-                pass
-            else:
-                merged_kwargs[key] = default_value
-
-        return merged_kwargs
 
     def full_arguments(self):
         args = self.args
-        kwargs = self._fill_kwargs_with_default()
+        kwargs = self.kwargs
 
         return args, kwargs
 
@@ -265,10 +240,30 @@ class ArgumentsIterator(object):
         return arguments
 
 
-class KernelArguments(Arguments):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class DefaultArguments(Kwargs):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def add_default_arguments_by_function(self, function_):
-        default_argument_dict = inspect_function_default_arguments(function_)
-        self.add_default_arguments(default_argument_dict=default_argument_dict)
+    def if_empty(self):
+        if self.kwargs == dict():
+            return True
+        else:
+            return False
+
+
+class DefaultMixin(DefaultArguments):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def add_default_arguments(self, default_argument_dict):
+        self.add_kwargs(**default_argument_dict)
+
+    def merge(self, kwargs):
+        merged_kwargs = {**kwargs}
+        for key, default_value in self.kwargs.items():
+            if key in merged_kwargs:
+                pass
+            else:
+                merged_kwargs[key] = default_value
+
+        return merged_kwargs
