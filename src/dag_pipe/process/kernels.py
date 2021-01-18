@@ -149,12 +149,13 @@ import pandas as pd
 def func(a: str, b: Optional[Union[str, int, pd.DataFrame]] = None, *args, **kwargs):
     return a
 
+
 class AClass(object):
 
     def __init__(self, *args, **kwargs):
         pass
 
-    def method_a(self, b: Optional[Union[str, int, pd.DataFrame]] = None, ):
+    def method_a(self, c: list, b: Optional[Union[str, int, pd.DataFrame]] = None,):
         return b
 
     @classmethod
@@ -162,10 +163,9 @@ class AClass(object):
         return b
 
 
-
 function_kernel = MethodKernel(AClass, 'method_a')
 
 sig = signature(function_kernel.callable)
-anotation = sig.parameters['b'].annotation
+anotation = sig.parameters['self'].kind
 
 print(anotation)
