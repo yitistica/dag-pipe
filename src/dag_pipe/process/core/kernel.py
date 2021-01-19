@@ -1,7 +1,4 @@
-"""
 
-location hash;
-"""
 from dag_pipe.helpers.elemental.attributes import AttributeBase, NotNullFieldMixin
 from dag_pipe.helpers.collections.containers import MappingDict
 

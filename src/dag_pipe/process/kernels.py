@@ -1,5 +1,4 @@
 """
-to some extent:
 
 """
 from dag_pipe.helpers.kernel_meta import build_function_meta, build_method_meta, serialize_kernel_meta

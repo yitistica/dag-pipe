@@ -75,7 +75,12 @@ class Args(object):
 
 
 class Kwargs(object):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # assuming the order of keys is kept in kwargs;
+        """
+        :param kwargs:
+        the order matter of **kwargs: https://www.python.org/dev/peps/pep-0468/
+        """
+
         self._kwargs = kwargs
 
     def add_kwargs(self, **kwargs):
@@ -231,7 +236,7 @@ class ArgumentsIterator(object):
             else:
                 NotImplementedError(f'argument type ({argument_type}) is not supported.')
 
-        arguments = ArgumentsCore(*args, **kwargs)
+        arguments = Arguments(*args, **kwargs)
         return arguments
 
     def __next__(self):
