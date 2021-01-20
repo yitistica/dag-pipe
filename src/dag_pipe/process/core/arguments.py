@@ -1,7 +1,7 @@
 """
 what arg
 base object:
-feed;
+feed can have the value of the collection;
 required kernel keywords;
 
 make module
@@ -9,9 +9,7 @@ make module
 can add repeated argument;
 
 """
-from collections import OrderedDict
-
-from dag_pipe.helpers.collections.argument import Arguments, DefaultMixin, inspect_function_default_arguments
+from dag_pipe.helpers.collections.argument import Arguments, DefaultArguments, inspect_function_default_arguments
 from dag_pipe.compartment.feed import Feed
 
 
@@ -43,37 +41,54 @@ class ArgumentValidatorMixin(object):
 
 class ProcessArgumentsBase(Arguments, ArgumentValidatorMixin):
     def __init__(self, *args, **kwargs):
+
+        for arg in args:
+            if not isinstance(arg, Feed):
+                raise TypeError(f'<{arg}> arg of type <{type(arg)}> must be an instance of {Feed}.')
+
+        for key, kwarg in kwargs.items():
+            if not isinstance(kwarg, Feed):
+                raise TypeError(f'<{key}: {kwarg}> kwarg of type <{type(kwarg)}> must be an instance of {Feed}.')
+
         super().__init__(*args, **kwargs)
 
     @property
     def args_values(self):
-        args_values = [arg.value if isinstance(arg, Feed) else arg for arg in self.args]
+        args_values = [arg.value for arg in self.args]
         return args_values
 
     @property
     def kwargs_values(self):
-        kwargs_values = {key: kwarg.value if isinstance(kwarg, Feed) else kwarg for key, kwarg in self.kwargs.items()}
+        kwargs_values = {key: kwarg.value for key, kwarg in self.kwargs.items()}
         return kwargs_values
 
     def _serialize(self):
+        # TODO
         pass
+
+
+class KernelDefaultArguments(DefaultArguments):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def add_defaults_by_function_inspection(self, function_, only_on=()):
+        default_arguments = inspect_function_default_arguments(function_)
+
+        if only_on:
+            default_arguments = {key: value for key, value in default_arguments.items() if key in only_on}
+
+        self.add_defaults(**default_arguments)
 
 
 class KernelArguments(ProcessArgumentsBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.default_arguments = DefaultMixin()
+        self.default_arguments = KernelDefaultArguments()
 
-    def add_default_arguments_by_function(self, function_):
-        default_argument_dict = inspect_function_default_arguments(function_)
-        self.default_arguments.add_kwargs(**default_argument_dict)
+    def full_arguments(self):
+        args = self.args
+        kwargs = self.kwargs
 
-
-
-
-class ProcessArguments(object):
-    def __init__(self):
-        pass
-
+        return args, kwargs
 

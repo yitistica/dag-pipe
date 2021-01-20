@@ -35,8 +35,14 @@ process id is different from run time id, process id
 """
 
 from dag_pipe.process.kernels import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
-from dag_pipe.process.kernels import KernelCollection
-from dag_pipe.process.argument import KernelArguments
+from dag_pipe.process.core.process import ProcessAttributes
+from dag_pipe.process.core.arguments import KernelArguments
+
+
+class KernelNotBuiltError(Exception):
+    def __init__(self):
+        message = f'Kernel is not built.'
+        super().__init__(message)
 
 
 class ProcessCollection(object):  # TEMP
@@ -52,12 +58,7 @@ class EmptyComponent(object):
 
 
 class ProcessCore(object):
-    def __init__(self):
-        self._id = None
-
-    @property
-    def id(self):
-        return self._id  # id should have a runtime difference
+    pass
 
 
 class ProcessKernel(ProcessComponent):
@@ -100,10 +101,6 @@ class ProcessKernel(ProcessComponent):
         return self._kernel
 
     @property
-    def kernel_id(self):
-        return self.kernel.id
-
-    @property
     def kernel_type(self):
         return self._kernel_type
 
@@ -115,37 +112,26 @@ class ProcessKernel(ProcessComponent):
         return self.kernel.callable(*args, **kwargs)
 
 
-class ProcessArguments(ProcessComponent):
+class Process(ProcessCore):
     def __init__(self):
         super().__init__()
-        self.kernel_arguments = EmptyComponent()
-
-    def add_kernel_arguments(self, *args, **kwargs):
-        self.kernel_arguments = KernelArguments(*args, **kwargs)
-
-
-class Process(ProcessCore):
-    def __init__(self, **kwargs):
-        super().__init__()
-
-        callable_ = kwargs.get('callable_')
-        type_ = kwargs.get('type_')
-        if callable_ and type_:
-            self.add_kernel(callable_=callable_, type_=type_)
-        else:
-            self._process_kernel = EmptyComponent()
-
-        self.arguments = EmptyComponent()
+        self._kernel = EmptyComponent()
+        self._kernel_arguments = KernelArguments()
 
     def add_kernel(self, callable_, type_):
-        self._process_kernel = ProcessKernel(callable_, type_)
+        self._kernel = ProcessKernel(callable_, type_)
 
-    def add_arguments(self, argument_type, *args, **kwargs):
+    def add_kernel_arguments(self, *args, **kwargs):
+        self._kernel_arguments = KernelArguments(*args, **kwargs)
+
+    def _run_kernel(self, *args, **kwargs):
+        if not isinstance(self._kernel, ProcessKernel):
+            raise KernelNotBuiltError()
+        else:
+            self._kernel.run(*args, **kwargs)
+
+    def run_process(self):
         pass
-
-
-class SubProcess(object):
-    pass
 
 
 class ProcessRunTime(object):  # separate, some only init once,
@@ -161,32 +147,3 @@ class ProcessLog(object):
     def _record_occurence(self):
         self.occurrence += 1
 
-
-class Gaussian(object):
-    def __init__(self, a, b=2):
-        self.a = a
-        self.b = b
-
-    def method_a(self, a):
-        return a + self.a
-
-    @staticmethod
-    def method_b(b):
-        return b + 1
-
-    @classmethod
-    def method_c(cls, c):
-        return c + 2
-
-
-def add_class(cls):
-    if 'a' in KernelCollection.kernels:
-        KernelCollection.kernels['b'] = cls  # wrap the class
-    else:
-        KernelCollection.kernels['a'] = cls
-    return cls
-
-
-
-
-print(KernelCollection.kernels)

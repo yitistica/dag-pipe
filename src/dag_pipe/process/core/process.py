@@ -32,3 +32,8 @@ class ProcessAttributes(AttributeBase, NotNullFieldMixin):
             self._check_null(field=field, null_forms=null_forms)
 
 
+class OccupiedProcessIDError(Exception):
+    def __init__(self, kernel_id):
+        message = f'Kernel by the id <{kernel_id}> is taken, cannot be reset.'
+        super().__init__(message)
+

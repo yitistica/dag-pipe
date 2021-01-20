@@ -24,7 +24,7 @@ from collections import OrderedDict
 import inspect
 import itertools
 
-from dag_pipe.utils.types import check_is_iterable
+from dag_pipe.utils.types import check_is_ordered_sequence
 from dag_pipe.utils.types import check_container_class
 
 
@@ -93,7 +93,7 @@ class Kwargs(object):
 
 class ArgumentCollection(object):
     def __new__(cls, collection):
-        if check_is_iterable(collection):
+        if check_is_ordered_sequence(collection):
             self = super().__new__(cls)
         else:
             raise TypeError(f"collection argument takes only an iterable, but was given an {type(collection)}")
@@ -179,9 +179,17 @@ class Arguments(ArgumentsCore):
 
         return args, kwargs
 
+    def first_arguments(self):
+        for index, arguments in enumerate(self):
+            return arguments
+        return None
+
     def __iter__(self):
         args, kwargs = self.full_arguments()
         return ArgumentsIterator(args=args, kwargs=kwargs)
+
+    def __len__(self):
+        pass
 
 
 class ArgumentsIterator(object):
@@ -189,6 +197,9 @@ class ArgumentsIterator(object):
         self._args = args
         self._kwargs = kwargs
         self.argument_product = self._build_iterator()
+
+    def __len__(self):
+        pass
 
     def _flatten_args(self):
         return [{'type': 'arg',
@@ -245,9 +256,10 @@ class ArgumentsIterator(object):
         return arguments
 
 
-class DefaultArguments(Kwargs):
+class DefaultArguments(Kwargs):  # does not support collection type;
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
+        self.add_defaults(**kwargs)
 
     def if_empty(self):
         if self.kwargs == dict():
@@ -255,13 +267,8 @@ class DefaultArguments(Kwargs):
         else:
             return False
 
-
-class DefaultMixin(DefaultArguments):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def add_default_arguments(self, default_argument_dict):
-        self.add_kwargs(**default_argument_dict)
+    def add_defaults(self, **defaults):
+        self.add_kwargs(**defaults)
 
     def merge(self, kwargs):
         merged_kwargs = {**kwargs}
@@ -272,3 +279,5 @@ class DefaultMixin(DefaultArguments):
                 merged_kwargs[key] = default_value
 
         return merged_kwargs
+
+

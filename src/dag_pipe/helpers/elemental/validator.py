@@ -42,10 +42,15 @@ class Validator(object, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def validate(self, value):
-        return self.validator(value=value, **self.params)
+        self.validator(value=value, **self.params)
 
     def __call__(self, value):
         self.validate(value=value)
+
+
+class _ValidatorResult(object):
+    # TODO implement a validator result, for logging;
+    pass
 
 
 class ValidatorSet(object):

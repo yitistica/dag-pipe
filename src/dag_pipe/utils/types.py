@@ -45,6 +45,10 @@ def check_is_iterable(object_):
     return isinstance(object_, Iterable)
 
 
+def check_is_ordered_sequence(object_):
+    return isinstance(object_, (list, tuple))
+
+
 def check_container_class(object_):
     if isinstance(object_, dict):
         return dict
