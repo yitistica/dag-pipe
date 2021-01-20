@@ -2,6 +2,16 @@ import pandas as pd
 
 from dag_pipe.helpers.elemental.validator import Validator, validator_factory
 from dag_pipe.compartment.utils import check_data_type
+from dag_pipe.helpers.collections.argument import ArgumentCollection
+
+
+class ArgValidator(Validator):
+    def validate(self, value):
+        if isinstance(value, ArgumentCollection):
+            for sub_value in value:
+                self.validator(value=sub_value, **self.params)
+        else:
+            self.validator(value=value, **self.params)
 
 
 class FailedValidationError(Exception):  # TEMP
@@ -29,14 +39,14 @@ class UnmatchedDataFrameSizeError(Exception):
         super().__init__(message)
 
 
-class BasicTypeValidator(Validator):
+class BasicTypeValidator(ArgValidator):
     def validator(self, value, expected_types):
         type_ = check_data_type(value)
         if type_ and (type_ not in expected_types):
             raise UnmatchedDataTypeError(expected_type=expected_types, given_type=type_)
 
 
-class DataFrameValidator(Validator):
+class DataFrameValidator(ArgValidator):
     expose_params = ['columns', 'row_size', 'col_size', 'row_test', 'col_test']
 
     @staticmethod

@@ -1,4 +1,5 @@
 """
+what arg
 base object:
 feed;
 required kernel keywords;
@@ -44,18 +45,18 @@ class ProcessArgumentsBase(Arguments, ArgumentValidatorMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _serialize(self):
-        pass
-
     @property
     def args_values(self):
-        args_values = [arg.value for arg in self.args]
+        args_values = [arg.value if isinstance(arg, Feed) else arg for arg in self.args]
         return args_values
 
     @property
     def kwargs_values(self):
-        kwargs_values = {key: kwarg.value for key, kwarg in self.kwargs.items()}
+        kwargs_values = {key: kwarg.value if isinstance(kwarg, Feed) else kwarg for key, kwarg in self.kwargs.items()}
         return kwargs_values
+
+    def _serialize(self):
+        pass
 
 
 class KernelArguments(ProcessArgumentsBase):
@@ -74,3 +75,5 @@ class KernelArguments(ProcessArgumentsBase):
 class ProcessArguments(object):
     def __init__(self):
         pass
+
+
