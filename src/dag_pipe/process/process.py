@@ -1,21 +1,15 @@
 """
 Process = Kernel + argument
 
-
 what if init twice with different arguments, and based on
-
 
 for process: if process pool exists the same, must raise?
 
-
 consider batch operation;  recurrent, or start, node, batch-wise operation,
-
 
 each process: has a skip process
 
 function: able to loop over a function for x times;
-
-
 
 @process.init()  # dependent init, or at start init;
 @process.method()
@@ -32,10 +26,13 @@ export to nosql or any database with specificied format, gen table;
 
 process id is different from run time id, process id
 
+
+process.arguments(Placeholder(), a=4, )
+
 """
 
-from dag_pipe.process.kernels import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
-from dag_pipe.process.core.process import ProcessAttributes
+from dag_pipe.process.core.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
+from dag_pipe.process.core.result import ProcessAttributes
 from dag_pipe.process.core.arguments import KernelArguments
 
 
@@ -58,6 +55,10 @@ class EmptyComponent(object):
 
 
 class ProcessCore(object):
+    pass
+
+
+class EmptyInitKernel(EmptyComponent):
     pass
 
 
@@ -112,38 +113,41 @@ class ProcessKernel(ProcessComponent):
         return self.kernel.callable(*args, **kwargs)
 
 
+class ProcessRunTime(object):  # separate, some only init once,
+    def __init__(self):
+        pass
+
+
+
+
 class Process(ProcessCore):
     def __init__(self):
         super().__init__()
-        self._kernel = EmptyComponent()
+        self._kernel = EmptyInitKernel()
         self._kernel_arguments = KernelArguments()
 
     def add_kernel(self, callable_, type_):
         self._kernel = ProcessKernel(callable_, type_)
 
     def add_kernel_arguments(self, *args, **kwargs):
-        self._kernel_arguments = KernelArguments(*args, **kwargs)
+        self._kernel_arguments.add_args(*args)
+        self._kernel_arguments.add_kwargs(**kwargs)
 
     def _run_kernel(self, *args, **kwargs):
         if not isinstance(self._kernel, ProcessKernel):
             raise KernelNotBuiltError()
         else:
-            self._kernel.run(*args, **kwargs)
+            raw_results = self._kernel.run(*args, **kwargs)
+
+        return raw_results
 
     def run_process(self):
         pass
 
-
-class ProcessRunTime(object):  # separate, some only init once,
-    def __init__(self):
-        pass
+    def init_runtime(self):
+        return None
 
 
-class ProcessLog(object):
 
-    def __init__(self):
-        self.occurrence = 0
 
-    def _record_occurence(self):
-        self.occurrence += 1
 

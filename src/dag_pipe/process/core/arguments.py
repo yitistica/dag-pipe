@@ -92,3 +92,9 @@ class KernelArguments(ProcessArgumentsBase):
 
         return args, kwargs
 
+    def replace(self, which_arg=None, which_kwarg=None, new_value=None):
+        pass
+
+
+
+
