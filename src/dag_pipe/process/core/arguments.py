@@ -86,15 +86,21 @@ class KernelArguments(ProcessArgumentsBase):
 
         self.default_arguments = KernelDefaultArguments()
 
-    def full_arguments(self):
+    def full_arguments(self, add_default=True):
         args = self.args
         kwargs = self.kwargs
 
+        if add_default:
+            kwargs = self.default_arguments.merge(kwargs=kwargs)
+
         return args, kwargs
 
-    def replace(self, which_arg=None, which_kwarg=None, new_value=None):
-        pass
+    def full_argument_values(self, add_default=True):
 
+        arg_values = self.args_values
+        kwarg_values = self.kwargs_values
 
+        if add_default:
+            kwarg_values = self.default_arguments.merge(kwargs=kwarg_values)
 
-
+        return arg_values, kwarg_values

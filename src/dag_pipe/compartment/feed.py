@@ -23,7 +23,7 @@ class Feed(Element):
     meta_dict = {'type': 'feed'}
 
     def __init__(self, value, **attributes):
-        self._meta = FeedMetaAttributes(**self.meta_dict)
+        self._meta = FeedMetaAttributes(self.meta_dict)
 
         attributes = FeedAttributes(attributes)
         super().__init__(value=value, attributes=attributes)

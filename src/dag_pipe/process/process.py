@@ -1,5 +1,5 @@
 """
-Process = Kernel + argument
+Process = Kernel + argument ?
 
 what if init twice with different arguments, and based on
 
@@ -15,7 +15,6 @@ function: able to loop over a function for x times;
 @process.method()
 @process.add_preprocessor()
 @process.add_afterprocess()  # such as easily convert it into different format;
-@process.input()
 @process.expose_network()
 @process.func(*kernel_args, **kernel_kwargs, analyzer=(func1, func2))
 
@@ -38,7 +37,7 @@ from dag_pipe.process.core.arguments import KernelArguments
 
 class KernelNotBuiltError(Exception):
     def __init__(self):
-        message = f'Kernel is not built.'
+        message = f'Kernel is not yet built for the process.'
         super().__init__(message)
 
 
@@ -58,7 +57,7 @@ class ProcessCore(object):
     pass
 
 
-class EmptyInitKernel(EmptyComponent):
+class EmptyInitKernel(object):
     pass
 
 
@@ -77,12 +76,13 @@ class ProcessKernel(ProcessComponent):
         else:
             raise TypeError(f'Kernel type {type_} is not supported.')
 
-        if type_ in ['init', 'method', 'classmethod', 'staticmethod']:
+        if type_ in ['method', 'classmethod', 'staticmethod']:
             method_name = kwargs.get('method_name')
             if not method_name:
                 raise TypeError(f'method_name is not supplied for Kernel of type {type_}.')
-
             kernel = kernel_cls(class_=callable_, method_name=method_name)
+        elif type_ in ['init']:
+            kernel = kernel_cls(class_=callable_)
         elif type_ in ['function']:
             kernel = kernel_cls(callable_=callable_)
         else:
@@ -95,7 +95,7 @@ class ProcessKernel(ProcessComponent):
         return process_kernel
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     @property
     def kernel(self):
@@ -110,14 +110,12 @@ class ProcessKernel(ProcessComponent):
         raise NotImplementedError()
 
     def run(self, *args, **kwargs):
-        return self.kernel.callable(*args, **kwargs)
+        return self.kernel.call(*args, **kwargs)
 
 
-class ProcessRunTime(object):  # separate, some only init once,
+class ProcessRunTime(object):  # control what to store, run multiple times?
     def __init__(self):
         pass
-
-
 
 
 class Process(ProcessCore):
@@ -126,14 +124,14 @@ class Process(ProcessCore):
         self._kernel = EmptyInitKernel()
         self._kernel_arguments = KernelArguments()
 
-    def add_kernel(self, callable_, type_):
-        self._kernel = ProcessKernel(callable_, type_)
+    def add_kernel(self, callable_, type_, **kwargs):
+        self._kernel = ProcessKernel(callable_=callable_, type_=type_, **kwargs)
 
     def add_kernel_arguments(self, *args, **kwargs):
         self._kernel_arguments.add_args(*args)
         self._kernel_arguments.add_kwargs(**kwargs)
 
-    def _run_kernel(self, *args, **kwargs):
+    def run_kernel(self, *args, **kwargs):
         if not isinstance(self._kernel, ProcessKernel):
             raise KernelNotBuiltError()
         else:
@@ -142,12 +140,9 @@ class Process(ProcessCore):
         return raw_results
 
     def run_process(self):
-        pass
-
-    def init_runtime(self):
-        return None
-
-
-
+        # 1. init run time;
+        arg_values, kwarg_values = self._kernel_arguments.full_argument_values(add_default=True)
+        raw_results = self.run_kernel(*arg_values, **kwarg_values)
+        return raw_results
 
 
