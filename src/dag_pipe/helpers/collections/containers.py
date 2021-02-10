@@ -19,6 +19,11 @@ setting default
 where condition , mixin
 """
 from collections.abc import MutableMapping
+from dag_pipe.utils.types import check_is_ordered_sequence
+from dag_pipe.utils.types import check_container_class
+
+_KEY_ITERABLE_TYPE = [dict]
+_CONTAINER_ITERABLE_TYPE = [list, tuple, set]
 
 
 class MappingDict(MutableMapping):
@@ -57,4 +62,60 @@ class MappingDict(MutableMapping):
     def __contains__(self, key):
         return key in self._dict
 
+
+class ValueCollection(object):
+    def __new__(cls, collection):
+        if check_is_ordered_sequence(collection):
+            self = super().__new__(cls)
+        else:
+            raise TypeError(f"collection takes only an iterable, but was given an {type(collection)}")
+        return self
+
+    def __init__(self, collection):
+        self.collection = collection
+
+    def __iter__(self):
+        return ValueCollectionIterator(self)
+
+    def __repr__(self):
+        if hasattr(self.collection, '__repr__'):
+            return f"ValueCollection({self.collection.__repr__()})"
+        else:
+            return None
+
+    def __str__(self):
+        if hasattr(self.collection, '__str__'):
+            return f"ValueCollection({self.collection.__str__()})"
+        else:
+            return None
+
+
+class ValueCollectionIterator(object):
+    def __new__(cls, value_collection):
+        if isinstance(value_collection, ValueCollection):
+            self = super().__new__(cls)
+        else:
+            raise TypeError(f"value_collection arg does not support the type: {type(value_collection)}")
+        return self
+
+    def __init__(self, value_collection):
+        self.value_collection = value_collection
+        self._type = check_container_class(value_collection.collection)
+        self._collection_iterator = None
+        self._build_collection_iterator()
+
+    def _build_collection_iterator(self):
+        if self._type in (_KEY_ITERABLE_TYPE + _CONTAINER_ITERABLE_TYPE):
+            self._collection_iterator = iter(self.value_collection.collection)
+        else:
+            raise TypeError(f'type {self._type} is not supported.')
+
+    def __next__(self):
+        _next = next(self._collection_iterator)
+        if self._type in _KEY_ITERABLE_TYPE:
+            return self.value_collection.collection[_next]
+        elif self._type in _CONTAINER_ITERABLE_TYPE:
+            return _next
+        else:
+            raise TypeError(f'type {self._type} is not supported.')
 

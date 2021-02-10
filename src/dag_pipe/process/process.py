@@ -124,7 +124,7 @@ class Process(ProcessCore):
         self._kernel = EmptyInitKernel()
         self._kernel_arguments = KernelArguments()
 
-    def add_kernel(self, callable_, type_, **kwargs):
+    def admit_kernel(self, callable_, type_, **kwargs):
         self._kernel = ProcessKernel(callable_=callable_, type_=type_, **kwargs)
 
     def add_kernel_arguments(self, *args, **kwargs):

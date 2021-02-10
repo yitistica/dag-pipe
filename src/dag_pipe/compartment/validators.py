@@ -2,12 +2,12 @@ import pandas as pd
 
 from dag_pipe.helpers.elemental.validator import Validator, validator_factory
 from dag_pipe.compartment.utils import check_data_type
-from dag_pipe.helpers.collections.argument import ArgumentCollection
+from dag_pipe.helpers.collections.argument import ValueCollection
 
 
 class ArgValidator(Validator):
     def validate(self, value):
-        if isinstance(value, ArgumentCollection):
+        if isinstance(value, ValueCollection):
             for sub_value in value:
                 self.validator(value=sub_value, **self.params)
         else:
