@@ -147,11 +147,16 @@ class Process(ProcessCore):
     def include_default(self, value):
         self._kernel_arguments.include_default = value
 
+    def get_kernel_argument_by_index(self, index):
+        pass
+
     def run_process(self):
         # 1. init run time;
 
-        for arguments in self._kernel_arguments:
-            args, kwargs = arguments.full_arguments()
+        for argument_index, arguments in enumerate(self._kernel_arguments):
+            print(argument_index, arguments)
+            args, kwargs = arguments.full_arguments()  # arguments only manage the container;
+
             arg_values = (arg.value for arg in args)
             kwarg_values = {kwarg_name: kwarg_value.value for kwarg_name, kwarg_value in kwargs.items()}
 

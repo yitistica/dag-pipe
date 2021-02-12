@@ -18,7 +18,6 @@ inspect.ismethod(obj) (Return True if the object is a bound method written in Py
 | function                 | False  |
 """
 
-import hashlib
 import inspect
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -174,9 +173,5 @@ def is_class_static_instance_method(method):
 def check_is_function(object_):
     return inspect.isfunction(object_)
 
-
-def hash_string(string, precision=7):
-    hash_ = int(hashlib.sha256(string.encode('utf-8')).hexdigest(), 16) % (10 ** precision)
-    return hash_
 
 

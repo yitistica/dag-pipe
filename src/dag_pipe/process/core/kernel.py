@@ -2,7 +2,9 @@
 from dag_pipe.helpers.elemental.attributes import AttributeBase, NotNullFieldMixin
 from dag_pipe.helpers.kernel_meta import build_function_meta, build_method_meta, serialize_kernel_meta
 from dag_pipe.helpers.collections.containers import MappingDict
-from dag_pipe.utils.types import hash_string, check_is_function, check_is_class
+from dag_pipe.utils.types import check_is_function, check_is_class
+from dag_pipe.utils.identifier import hash_string
+
 
 _HASH_PRECISION = 7
 
