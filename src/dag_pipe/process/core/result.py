@@ -29,7 +29,7 @@ when get then delete
 from dag_pipe.helpers.elemental.attributes import AttributeBase, NotNullFieldMixin
 
 
-class ProcessComponent(object):
+class ProcessResult(object):
     pass
 
 

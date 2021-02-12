@@ -153,7 +153,7 @@ class Process(ProcessCore):
         for arguments in self._kernel_arguments:
             args, kwargs = arguments.full_arguments()
             arg_values = (arg.value for arg in args)
-            kwarg_values = {kwarg_name: kwarg_value for kwarg_name, kwarg_value in kwargs.items()}
+            kwarg_values = {kwarg_name: kwarg_value.value for kwarg_name, kwarg_value in kwargs.items()}
 
             raw_results = self.run_kernel(*arg_values, **kwarg_values)
 
