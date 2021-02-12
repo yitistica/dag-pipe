@@ -85,8 +85,16 @@ class ProcessArgumentsBase(Arguments, ArgumentValidatorMixin):
 
 
 class KernelDefaultArguments(DefaultArguments):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, **defaults):
+        super().__init__()
+        self.add_default(**defaults)
+
+    def add_default(self, **defaults):
+        wrapped_kwargs = dict()
+        for key, kwarg in defaults.items():
+            wrapped_kwargs[key] = Feed(value=kwarg)
+
+        super().add_defaults(**wrapped_kwargs)
 
     def add_defaults_by_function_inspection(self, function_, only_on=()):
         default_arguments = inspect_function_default_arguments(function_)
@@ -101,23 +109,25 @@ class KernelArguments(ProcessArgumentsBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._include_default = True
         self.default_arguments = KernelDefaultArguments()
 
-    def full_arguments(self, add_default=True):
+    @property
+    def include_default(self):
+        return self._include_default
+
+    @include_default.setter
+    def include_default(self, value):
+        if not isinstance(value, bool):
+            raise TypeError(f"value can only be set to bool type.")
+        else:
+            self._include_default = value
+
+    def full_arguments(self):  # this method will replace the original one and passed into iterator;
         args = self.args
         kwargs = self.kwargs
 
-        if add_default:
+        if self._include_default:
             kwargs = self.default_arguments.merge(kwargs=kwargs)
 
         return args, kwargs
-
-    def full_argument_values(self, add_default=True):
-
-        arg_values = self.args_values
-        kwarg_values = self.kwargs_values
-
-        if add_default:
-            kwarg_values = self.default_arguments.merge(kwargs=kwarg_values)
-
-        return arg_values, kwarg_values

@@ -139,10 +139,24 @@ class Process(ProcessCore):
 
         return raw_results
 
+    @property
+    def include_default(self):
+        return self._kernel_arguments.include_default
+
+    @include_default.setter
+    def include_default(self, value):
+        self._kernel_arguments.include_default = value
+
     def run_process(self):
         # 1. init run time;
-        arg_values, kwarg_values = self._kernel_arguments.full_argument_values(add_default=True)
-        raw_results = self.run_kernel(*arg_values, **kwarg_values)
+
+        for arguments in self._kernel_arguments:
+            args, kwargs = arguments.full_arguments()
+            arg_values = (arg.value for arg in args)
+            kwarg_values = {kwarg_name: kwarg_value for kwarg_name, kwarg_value in kwargs.items()}
+
+            raw_results = self.run_kernel(*arg_values, **kwarg_values)
+
         return raw_results
 
 
