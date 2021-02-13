@@ -19,6 +19,10 @@ from dag_pipe.helpers.collections.argument import ValueCollection, Arguments, De
 from dag_pipe.compartment.feed import Feed
 
 
+_KERNEL_ARGUMENT_INCLUDE_DEFAULT = True
+_KERNEL_ARGUMENT_HASH_PRECISION = 7
+
+
 class ArgumentValidatorMixin(object):
 
     @staticmethod
@@ -109,7 +113,7 @@ class KernelArguments(ProcessArgumentsBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._include_default = True
+        self._include_default = _KERNEL_ARGUMENT_INCLUDE_DEFAULT
         self.default_arguments = KernelDefaultArguments()
 
     @property

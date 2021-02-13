@@ -189,13 +189,12 @@ class ArgumentsIterator(object):
             else:
                 NotImplementedError(f'argument type ({argument_type}) is not supported.')
 
-        arguments = Arguments(*args, **kwargs)
-        return arguments
+        return args, kwargs
 
     def __next__(self):
         argument_values = next(self.argument_product)
-        arguments = self._construct_argument_object_with_values(argument_values=argument_values)
-        return arguments
+        args, kwargs = self._construct_argument_object_with_values(argument_values=argument_values)
+        return args, kwargs
 
 
 class DefaultArguments(Kwargs):  # does not support collection type;

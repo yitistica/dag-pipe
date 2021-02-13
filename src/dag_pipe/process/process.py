@@ -28,6 +28,8 @@ process id is different from run time id, process id
 
 process.arguments(Placeholder(), a=4, )
 
+
+argument hash: is not the same as hashing the the actual input;
 """
 
 from dag_pipe.process.core.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
