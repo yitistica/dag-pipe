@@ -1,3 +1,7 @@
+"""
+Feed: the basic element of argument, results;
+"""
+
 from dag_pipe.helpers.elemental.element import Element
 from dag_pipe.compartment.attributes import FeedMetaAttributes, FeedAttributes
 from dag_pipe.compartment.validators import BasicTypeValidator, DataFrameValidator

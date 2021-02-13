@@ -11,6 +11,14 @@ class AttributeFilter(object):
 
 
 class FeedMetaAttributes(Attributes):
+    pass
+
+
+class FeedAttributes(Attributes):
+    pass
+
+
+class ResultMetaAttributes(Attributes):
     def __init__(self, kwargs):
         if _FEED_ID_VAR_NAME in kwargs:
             raise KeyError(f"intended attribute contains reserved name {_FEED_ID_VAR_NAME}, "
@@ -20,14 +28,6 @@ class FeedMetaAttributes(Attributes):
             kwargs = {_FEED_ID_VAR_NAME: feed_id, **kwargs}
 
         super().__init__(kwargs)
-
-
-class FeedAttributes(Attributes):
-    pass
-
-
-class ResultMetaAttributes(Attributes):
-    pass
 
 
 class ResultAttributes(Attributes):
