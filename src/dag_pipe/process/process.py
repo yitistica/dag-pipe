@@ -159,7 +159,7 @@ class Process(ProcessCore):
             args, kwargs = arguments  # arguments only manage the container;
 
             flatten_arguments = FlatArguments(*args, **kwargs)
-            argument_hash = flatten_arguments.hash_id
+            arguments_value_id = flatten_arguments.arguments_value_id
 
             arg_values = (arg.value for arg in args)
             kwarg_values = {kwarg_name: kwarg_value.value for kwarg_name, kwarg_value in kwargs.items()}

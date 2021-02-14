@@ -9,12 +9,13 @@ class EmptyValue(object):
 
 class ElementBase(object):
     def __init__(self, value, attributes):
-        self._value = value
-
         if isinstance(attributes, Attributes):
             self._attributes = attributes
         else:
             raise TypeError(f"attributes <{attributes}> is not an instance of Attributes.")
+
+        self._value = EmptyValue
+        self.set_value(value)
 
     @property
     def value(self):

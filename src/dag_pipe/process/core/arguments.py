@@ -17,28 +17,27 @@ argument > value collection > feed
 from dag_pipe.helpers.collections.argument import ValueCollection, Arguments, DefaultArguments, \
     inspect_function_default_arguments
 from dag_pipe.compartment.feed import Feed
-from dag_pipe.compartment.attributes import FEED_ID_VAR_NAME
 from dag_pipe.utils.identifier import hash_string
 
 _KERNEL_ARGUMENT_INCLUDE_DEFAULT = True
 _KERNEL_ARGUMENT_HASH_PRECISION = 7
 
 
-def _hash_arg_kwargs(args, kwargs):  # this only make sure that the argument holders have not change;
+def _hash_arguments_values(args, kwargs):  # this only make sure that the argument holders have not change;
     ids = []
     for arg in args:
         if isinstance(arg, ValueCollection):
             for element in arg:
-                ids.append(element.meta[FEED_ID_VAR_NAME])
+                ids.append(str(element.value_id))
         else:
-            ids.append(arg.meta[FEED_ID_VAR_NAME])
+            ids.append(str(arg.value_id))
 
     for kwarg_name, kwarg in kwargs.items():
         if isinstance(kwarg, ValueCollection):
             for element in kwarg:
-                ids.append(element.meta[FEED_ID_VAR_NAME])
+                ids.append(str(element.value_id))
         else:
-            ids.append(kwarg.meta[FEED_ID_VAR_NAME])
+            ids.append(str(kwarg.value_id))
 
     concat_id = '_'.join(ids)
     hash_ = hash_string(string=concat_id)
@@ -109,6 +108,13 @@ class ProcessArgumentsBase(Arguments, ArgumentValidatorMixin):
         # TODO
         pass
 
+    @property
+    def arguments_value_id(self):
+        args, kwargs = self.full_arguments()
+        print(args, kwargs)
+        value_id = _hash_arguments_values(args, kwargs)
+        return value_id
+
 
 class FlatArguments(ProcessArgumentsBase):
     def __init__(self, *args, **kwargs):
@@ -121,12 +127,6 @@ class FlatArguments(ProcessArgumentsBase):
                 raise TypeError(f"Flat argument {kwarg} does not support ValueCollection type.")
 
         super().__init__(*args, **kwargs)
-
-    @property
-    def hash_id(self):
-        args, kwargs = self.full_arguments()
-        hash_id = _hash_arg_kwargs(args, kwargs)
-        return hash_id
 
 
 class KernelDefaultArguments(DefaultArguments):

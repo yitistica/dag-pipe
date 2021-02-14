@@ -3,7 +3,7 @@ Feed: the basic element of argument, results;
 """
 
 from dag_pipe.helpers.elemental.element import Element
-from dag_pipe.compartment.attributes import FeedMetaAttributes, FeedAttributes, FEED_ID_VAR_NAME
+from dag_pipe.compartment.attributes import FeedMetaAttributes, FeedAttributes
 from dag_pipe.compartment.validators import BasicTypeValidator, DataFrameValidator
 
 
@@ -38,6 +38,14 @@ class Feed(Element):
 
     def validators_setting(self):
         return self.validator_set.summary
+
+    def set_value(self, value):
+        super().set_value(value=value)
+        self.attributes.assign_value_id()  # assign id if a new value is injected;
+
+    @property
+    def value_id(self):
+        return self.attributes.value_id
 
 
 class PlaceHolder(Feed):
