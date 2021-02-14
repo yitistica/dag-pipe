@@ -42,23 +42,3 @@ class ResultMetaAttributes(Attributes):
 class ResultAttributes(Attributes):
     pass
 
-
-def _hash_arg_kwargs(args, kwargs):  # this only make sure that the argument holders have not change;
-    ids = []
-    for arg in args:
-        if isinstance(arg, ValueCollection):
-            for element in arg:
-                ids.append(element.meta[FEED_ID_VAR_NAME])
-        else:
-            ids.append(arg.meta[FEED_ID_VAR_NAME])
-
-    for kwarg_name, kwarg in kwargs.items():
-        if isinstance(kwarg, ValueCollection):
-            for element in kwarg:
-                ids.append(element.meta[FEED_ID_VAR_NAME])
-        else:
-            ids.append(kwarg.meta[FEED_ID_VAR_NAME])
-
-    concat_id = '_'.join(ids)
-    hash_ = hash_string(string=concat_id)
-    return hash_

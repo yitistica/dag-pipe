@@ -34,7 +34,7 @@ argument hash: is not the same as hashing the the actual input;
 
 from dag_pipe.process.core.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
 from dag_pipe.process.core.result import ProcessAttributes
-from dag_pipe.process.core.arguments import KernelArguments
+from dag_pipe.process.core.arguments import KernelArguments, FlatArguments
 
 
 class KernelNotBuiltError(Exception):
@@ -156,8 +156,10 @@ class Process(ProcessCore):
         # 1. init run time;
 
         for argument_index, arguments in enumerate(self._kernel_arguments):
-            print(argument_index, arguments)
-            args, kwargs = arguments.full_arguments()  # arguments only manage the container;
+            args, kwargs = arguments  # arguments only manage the container;
+
+            flatten_arguments = FlatArguments(*args, **kwargs)
+            argument_hash = flatten_arguments.hash_id
 
             arg_values = (arg.value for arg in args)
             kwarg_values = {kwarg_name: kwarg_value.value for kwarg_name, kwarg_value in kwargs.items()}
