@@ -47,6 +47,10 @@ class Feed(Element):
     def value_id(self):
         return self.attributes.value_id
 
+    @property
+    def feed_id(self):
+        return self.meta.feed_id
+
 
 class PlaceHolder(Feed):
     meta_dict = {'type': _FEED_TYPE_PLACEHOLDER}

@@ -27,6 +27,10 @@ class FeedMetaAttributes(Attributes):
 
         super().__init__(kwargs)
 
+    @property
+    def feed_id(self):
+        return self[FEED_ID_VAR_NAME]
+
 
 class FeedAttributes(Attributes):
     def __init__(self, kwargs):

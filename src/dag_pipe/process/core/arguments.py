@@ -9,9 +9,7 @@ make module
 can add repeated argument;
 
 
-within a feed
-
-argument > value collection > feed
+hash individual;
 
 """
 from dag_pipe.helpers.collections.argument import ValueCollection, Arguments, DefaultArguments, \

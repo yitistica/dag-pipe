@@ -21,6 +21,8 @@ if empty:
 
 when get then delete
 
+same value id
+
 
 result could be batch, and different params, and size;
 """
