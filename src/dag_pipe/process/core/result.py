@@ -23,37 +23,21 @@ when get then delete
 
 
 result could be batch, and different params, and size;
-
-dont use pickle to serialize id, because different machine and float can reduce the liability;
-
 """
-from dag_pipe.helpers.elemental.element import Element
+from dag_pipe.compartment.feed import Feed
 from dag_pipe.helpers.collections.containers import MappingDict
 from dag_pipe.compartment.attributes import ResultMetaAttributes, ResultAttributes
 from dag_pipe.helpers.elemental.attributes import AttributeBase, NotNullFieldMixin
 
 
-class Result(Element):
+class Result(Feed):
     meta_dict = {'type': 'result'}
 
     def __init__(self, value, **attributes):
-        self._meta = ResultMetaAttributes(self.meta_dict)
-
-        attributes = ResultAttributes(attributes)
         super().__init__(value=value, attributes=attributes)
 
-    @property
-    def meta(self):
-        return self._meta
 
-    def validators_setting(self):
-        return self.validator_set.summary
-
-
-class KernelResults(object):
-
-    def __init__(self):
-        pass
+class KernelResults(Result):  # same arg but different batch perhaps?
 
     def admit_result(self, value, **attributes):
         pass
@@ -84,3 +68,7 @@ class OccupiedProcessIDError(Exception):
         message = f'Kernel by the id <{kernel_id}> is taken, cannot be reset.'
         super().__init__(message)
 
+
+a = KernelResults('a')
+
+print(a.meta.attris)
