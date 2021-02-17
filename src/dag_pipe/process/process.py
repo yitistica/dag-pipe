@@ -33,8 +33,9 @@ argument hash: is not the same as hashing the the actual input;
 """
 
 from dag_pipe.process.core.kernel import FunctionKernel, InitKernel, MethodKernel, ClassMethodKernel, StaticMethodKernel
-from dag_pipe.process.core.result import ProcessAttributes
+from dag_pipe.process.core.results import ProcessAttributes
 from dag_pipe.process.core.arguments import KernelArguments, FlatArguments
+from dag_pipe.process.core.results import KernelResultsCollector, Result
 
 
 class KernelNotBuiltError(Exception):
@@ -125,6 +126,7 @@ class Process(ProcessCore):
         super().__init__()
         self._kernel = EmptyInitKernel()
         self._kernel_arguments = KernelArguments()
+        self._kernel_results = KernelResultsCollector()
 
     def admit_kernel(self, callable_, type_, **kwargs):
         self._kernel = ProcessKernel(callable_=callable_, type_=type_, **kwargs)
@@ -132,6 +134,9 @@ class Process(ProcessCore):
     def add_kernel_arguments(self, *args, **kwargs):
         self._kernel_arguments.add_args(*args)
         self._kernel_arguments.add_kwargs(**kwargs)
+
+    def add_result_partition(self, validators=(), **kwargs):
+        self._kernel_results.add_partition()
 
     def run_kernel(self, *args, **kwargs):
         if not isinstance(self._kernel, ProcessKernel):
@@ -152,20 +157,32 @@ class Process(ProcessCore):
     def get_kernel_argument_by_index(self, index):
         pass
 
+    def _init_runtime(self):
+        if self._kernel_results.pool_size == 0:
+            self.add_result_partition()
+
     def run_process(self):
         # 1. init run time;
+        self._init_runtime()
 
         for argument_index, arguments in enumerate(self._kernel_arguments):
             args, kwargs = arguments  # arguments only manage the container;
 
             flatten_arguments = FlatArguments(*args, **kwargs)
-            arguments_value_id = flatten_arguments.arguments_value_id
+            params_value_id_tuple = flatten_arguments.param_hashes
 
             arg_values = (arg.value for arg in args)
             kwarg_values = {kwarg_name: kwarg_value.value for kwarg_name, kwarg_value in kwargs.items()}
-
             raw_results = self.run_kernel(*arg_values, **kwarg_values)
 
-        return raw_results
+            if self._kernel_results.pool_size > 1:
+                for index, raw_result in enumerate(raw_results):
+                    result = Result(raw_result)  # TODO fix the logic
+                    self._kernel_results.admit_result(identifier=index, key=params_value_id_tuple, result=result)
+            else:
+                result = Result(raw_results)
+                self._kernel_results.admit_result(identifier=0, key=params_value_id_tuple, result=result)
 
+    def retrieve_result(self, identifier=0):
+        return self._kernel_results.retrieve_result(identifier=identifier)
 

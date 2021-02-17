@@ -14,7 +14,7 @@ hash individual;
 """
 from dag_pipe.helpers.collections.argument import ValueCollection, Arguments, DefaultArguments, \
     inspect_function_default_arguments
-from dag_pipe.compartment.feed import Feed
+from dag_pipe.compartment.feed import Feed, Param
 from dag_pipe.utils.identifier import hash_string
 
 _KERNEL_ARGUMENT_INCLUDE_DEFAULT = True
@@ -124,6 +124,36 @@ class FlatArguments(ProcessArgumentsBase):
                 raise TypeError(f"Flat argument {kwarg} does not support ValueCollection type.")
 
         super().__init__(*args, **kwargs)
+
+    @property
+    def hashes(self):
+        args, kwargs = self.full_arguments()
+
+        arg_hashes, kwarg_hashes = [], []
+        for index, arg in enumerate(args):
+            arg_hashes.append((index, arg.value_id))
+
+        for kwarg_name, kwarg in kwargs.items():
+            kwarg_hashes.append((kwarg_name, kwarg.value_id))
+
+        hash_tuple = tuple(args + kwargs)
+        return hash_tuple
+
+    @property
+    def param_hashes(self):
+        args, kwargs = self.full_arguments()
+
+        arg_hashes, kwarg_hashes = [], []
+        for index, arg in enumerate(args):
+            if isinstance(arg, Param):
+                arg_hashes.append((index, arg.value_id))
+
+        for kwarg_name, kwarg in kwargs.items():
+            if isinstance(kwarg, Param):
+                kwarg_hashes.append((kwarg_name, kwarg.value_id))
+
+        hash_tuple = tuple(arg_hashes + kwarg_hashes)
+        return hash_tuple
 
 
 class KernelDefaultArguments(DefaultArguments):

@@ -72,7 +72,7 @@ class ValueCollection(object):
         return self
 
     def __init__(self, collection):
-        self.collection = collection
+        self.collection = list(collection)  # turn into list
 
     def __iter__(self):
         return ValueCollectionIterator(self)
@@ -88,6 +88,12 @@ class ValueCollection(object):
             return f"ValueCollection({self.collection.__str__()})"
         else:
             return None
+
+    def append(self, value):
+        self.collection.append(value)
+
+    def remove(self, index):
+        del self.collection[index]
 
 
 class ValueCollectionIterator(object):
